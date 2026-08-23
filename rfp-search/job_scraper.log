@@ -1,0 +1,52 @@
+2025-06-21 12:44:16,085 - PPAScraper - ERROR - Error scraping https://tenders.ppa.gov.gh/eois?page=19: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+2025-06-21 12:46:49,360 - AfDBScraper - ERROR - Error scraping AfDB: Message: 
+Stacktrace:
+	GetHandleVerifier [0x0x7ff765c2cda5+78885]
+	GetHandleVerifier [0x0x7ff765c2ce00+78976]
+	(No symbol) [0x0x7ff7659e9bca]
+	(No symbol) [0x0x7ff765a40766]
+	(No symbol) [0x0x7ff765a40a1c]
+	(No symbol) [0x0x7ff765a94467]
+	(No symbol) [0x0x7ff765a68bcf]
+	(No symbol) [0x0x7ff765a9122f]
+	(No symbol) [0x0x7ff765a68963]
+	(No symbol) [0x0x7ff765a316b1]
+	(No symbol) [0x0x7ff765a32443]
+	GetHandleVerifier [0x0x7ff765f04eed+3061101]
+	GetHandleVerifier [0x0x7ff765eff33d+3037629]
+	GetHandleVerifier [0x0x7ff765f1e592+3165202]
+	GetHandleVerifier [0x0x7ff765c4730e+186766]
+	GetHandleVerifier [0x0x7ff765c4eb3f+217535]
+	GetHandleVerifier [0x0x7ff765c359b4+114740]
+	GetHandleVerifier [0x0x7ff765c35b69+115177]
+	GetHandleVerifier [0x0x7ff765c1c368+10728]
+	BaseThreadInitThunk [0x0x7ffa998fe8d7+23]
+	RtlUserThreadStart [0x0x7ffa9acdc34c+44]
+
+2025-06-21 12:54:01,925 - PPAScraper - WARNING - Retrying https://tenders.ppa.gov.gh/eois?page=34 (attempt 1/3) due to: ('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))
+2025-06-21 12:54:01,989 - PPAScraper - WARNING - Retrying https://tenders.ppa.gov.gh/tenders (attempt 1/3) due to: HTTPSConnectionPool(host='tenders.ppa.gov.gh', port=443): Max retries exceeded with url: /tenders (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x000001F0C7C41BD0>: Failed to resolve 'tenders.ppa.gov.gh' ([Errno 11001] getaddrinfo failed)"))
+2025-06-21 12:54:01,989 - PPAScraper - WARNING - Retrying https://tenders.ppa.gov.gh/tenders (attempt 1/3) due to: HTTPSConnectionPool(host='tenders.ppa.gov.gh', port=443): Max retries exceeded with url: /tenders (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x000001F0C7C41BD0>: Failed to resolve 'tenders.ppa.gov.gh' ([Errno 11001] getaddrinfo failed)"))
+2025-06-21 12:54:25,655 - AfDBScraper - WARNING - Retrying AfDB scrape (attempt 1/3) due to: Message: 
+Stacktrace:
+	GetHandleVerifier [0x0x7ff765c2cda5+78885]
+	GetHandleVerifier [0x0x7ff765c2ce00+78976]
+	(No symbol) [0x0x7ff7659e9bca]
+	(No symbol) [0x0x7ff765a40766]
+	(No symbol) [0x0x7ff765a40a1c]
+	(No symbol) [0x0x7ff765a94467]
+	(No symbol) [0x0x7ff765a68bcf]
+	(No symbol) [0x0x7ff765a9122f]
+	(No symbol) [0x0x7ff765a68963]
+	(No symbol) [0x0x7ff765a316b1]
+	(No symbol) [0x0x7ff765a32443]
+	GetHandleVerifier [0x0x7ff765f04eed+3061101]
+	GetHandleVerifier [0x0x7ff765eff33d+3037629]
+	GetHandleVerifier [0x0x7ff765f1e592+3165202]
+	GetHandleVerifier [0x0x7ff765c4730e+186766]
+	GetHandleVerifier [0x0x7ff765c4eb3f+217535]
+	GetHandleVerifier [0x0x7ff765c359b4+114740]
+	GetHandleVerifier [0x0x7ff765c35b69+115177]
+	GetHandleVerifier [0x0x7ff765c1c368+10728]
+	BaseThreadInitThunk [0x0x7ffa998fe8d7+23]
+	RtlUserThreadStart [0x0x7ffa9acdc34c+44]
+
