@@ -7,6 +7,7 @@ from ..core.keywords import find_matched_keywords
 from ..core.sources import SOURCES, Source
 from ..models.opportunity import Opportunity
 from .rss_scraper import fetch_rss_posts
+from .thepoint_scraper import fetch_posts as fetch_thepoint_posts
 from .wp_rest_scraper import fetch_posts
 
 logger = logging.getLogger(__name__)
@@ -15,6 +16,8 @@ logger = logging.getLogger(__name__)
 def _scrape_source(source: Source):
     if source.scraper == "rss":
         return fetch_rss_posts(source.base_url, source.feed_path)
+    if source.scraper == "thepoint_html":
+        return fetch_thepoint_posts(source.base_url)
     return fetch_posts(source.base_url, source.category_slug)
 
 
@@ -38,6 +41,8 @@ def run_all(db: Session) -> Tuple[Dict[str, int], List[Opportunity]]:
             logger.error(f"Scrape failed for {source.name}: {e}")
             summary[source.name] = 0
             continue
+
+        logger.info(f"{source.name}: fetched {len(posts)} recent post(s) before filtering")
 
         added = 0
         for post in posts:

@@ -1,7 +1,7 @@
 """
 The three Gambian news sites this system watches for consulting opportunities.
 
-Each site is scraped one of two ways:
+Each site is scraped one of three ways:
 
 - "wp_rest": the site runs WordPress, so we pull structured JSON from its
   built-in /wp-json/wp/v2/posts REST API. category_slug scopes the scrape to
@@ -11,8 +11,14 @@ Each site is scraped one of two ways:
   site instead and leans entirely on the keyword filter.
 
 - "rss": the site isn't WordPress but publishes a standard RSS feed at
-  feed_path. Used for thepoint.gm, which is a custom-built site with no
-  REST API but does declare an RSS feed in its <head>.
+  feed_path covering the content we need. (Not currently used by any source
+  below -- kept for future sites where this fits; thepoint.gm's RSS feed
+  turned out to be scoped to "Headlines" only, not its notices category.)
+
+- "thepoint_html": bespoke scraper for thepoint.gm specifically (see
+  app/scrapers/thepoint_scraper.py). It's a custom-built site with no REST
+  API, and its RSS feed doesn't cover the category we need, so this scrapes
+  its "Advertisements" category listing page directly.
 
 Either way, every post that comes back still has to pass the consulting
 keyword filter (app/core/keywords.py) before it's stored.
@@ -25,7 +31,7 @@ from typing import Optional
 class Source:
     name: str
     base_url: str
-    scraper: str = "wp_rest"  # "wp_rest" or "rss"
+    scraper: str = "wp_rest"  # "wp_rest", "rss", or "thepoint_html"
     category_slug: Optional[str] = None  # wp_rest only
     feed_path: Optional[str] = None  # rss only
     enabled: bool = True
@@ -34,13 +40,7 @@ class Source:
 SOURCES = [
     Source(name="standard.gm", base_url="https://standard.gm", scraper="wp_rest", category_slug="advertisement"),
 
-    # Not WordPress -- custom-built site. It declares an RSS feed
-    # (/posts/rss/xml) titled "Headlines" in its <head>; unconfirmed whether
-    # that feed actually includes the "Advertisements" category (URL slug
-    # /technology) where notices/tenders live, or just top headlines. If it
-    # turns out too narrow, switch to an HTML scraper against
-    # https://thepoint.gm/technology instead.
-    Source(name="thepoint.gm", base_url="https://thepoint.gm", scraper="rss", feed_path="/posts/rss/xml"),
+    Source(name="thepoint.gm", base_url="https://thepoint.gm", scraper="thepoint_html"),
 
     # TODO: confirm whether foroyaa.net is WordPress (check
     # foroyaa.net/wp-json/wp/v2/posts?per_page=1) or has an RSS feed. Until
