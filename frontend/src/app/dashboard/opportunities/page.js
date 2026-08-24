@@ -2,8 +2,8 @@
 import React, { useState, useEffect } from "react";
 import OpportunityCard from "@/app/components/opportunity-card";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import { API_URL } from "@/app/lib/api";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 const SOURCES = ["standard.gm", "thepoint.gm", "foroyaa.net"];
 
 export default function OpportunitiesPage() {

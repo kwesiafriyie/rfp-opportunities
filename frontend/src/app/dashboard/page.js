@@ -8,8 +8,8 @@ import {
   EnvelopeIcon,
   ArrowRightIcon,
 } from "@heroicons/react/24/outline";
+import { API_URL } from "@/app/lib/api";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 const SOURCES = ["standard.gm", "thepoint.gm", "foroyaa.net"];
 const SOURCE_STYLES = {
   "standard.gm": "bg-blue-50 text-blue-700 ring-blue-600/20",

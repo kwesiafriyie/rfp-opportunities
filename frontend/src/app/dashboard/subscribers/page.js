@@ -1,8 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { EnvelopeIcon, TrashIcon, PlusIcon } from "@heroicons/react/24/outline";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+import { API_URL } from "@/app/lib/api";
 
 export default function SubscribersPage() {
   const [subscribers, setSubscribers] = useState([]);
