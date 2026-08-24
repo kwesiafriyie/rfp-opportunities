@@ -1,23 +1,27 @@
-# RFP Opportunities Backend
+# Consulting Opportunities Backend
 
-FastAPI backend for the RFP Opportunities application.
+FastAPI backend that scrapes standard.gm, thepoint.gm, and foroyaa.net for
+consulting/EOI/RFP notices via each site's WordPress REST API, stores matches
+in SQLite, and serves them to the frontend.
 
 ## Project Structure
 
 ```
 backend/
 ├── app/
-│   ├── api/
-│   │   └── endpoints/       # API route handlers
-│   ├── core/               # Core functionality
-│   ├── models/             # Database models
-│   ├── scrapers/           # Web scrapers
-│   ├── services/           # Business logic
-│   ├── utils/              # Utility functions
-│   └── main.py             # FastAPI application
-├── tests/                  # Test files
-├── .env                    # Environment variables
-└── requirements.txt        # Python dependencies
+│   ├── api/endpoints/opportunities.py  # GET list/detail, POST refresh
+│   ├── core/
+│   │   ├── config.py      # settings (DB URL, CORS, scrape schedule)
+│   │   ├── sources.py     # the 3 sites being scraped
+│   │   ├── keywords.py    # consulting-opportunity keyword filter
+│   │   └── database.py
+│   ├── models/opportunity.py
+│   ├── scrapers/
+│   │   ├── wp_rest_scraper.py  # generic WordPress REST API scraper
+│   │   └── pipeline.py         # runs all sources, dedupes, stores
+│   ├── scheduler.py        # daily scrape via APScheduler
+│   └── main.py
+└── requirements.txt
 ```
 
 ## Setup
@@ -33,47 +37,39 @@ backend/
    pip install -r requirements.txt
    ```
 
-3. Create a `.env` file in the backend directory with the following variables:
+3. (Optional) Create a `.env` file in the backend directory to override defaults:
    ```
-   DATABASE_URL=sqlite:///./tender_jobs.db
-   ```
-
-4. Run migrations (if using SQLAlchemy with migrations):
-   ```bash
-   alembic upgrade head
+   DATABASE_URL=sqlite:///./opportunities.db
+   SCRAPE_HOUR_UTC=6
    ```
 
-5. Start the development server:
+4. Start the development server:
    ```bash
    uvicorn app.main:app --reload
    ```
 
+On startup the server runs an initial scrape in the background (so the DB
+isn't empty), then re-scrapes daily at `SCRAPE_HOUR_UTC`. You can also trigger
+a scrape manually: `POST /api/opportunities/refresh`.
+
 ## API Documentation
 
-Once the server is running, you can access:
-- API documentation: http://localhost:8000/docs
-- Alternative documentation: http://localhost:8000/redoc
+Once running:
+- API docs: http://localhost:8000/docs
+- `GET /api/opportunities/` — list opportunities (`?source=`, `?search=`, `?skip=`, `?limit=`)
+- `GET /api/opportunities/{id}` — single opportunity
+- `POST /api/opportunities/refresh` — trigger an immediate scrape
 
-## Development
+## Adding/tuning a source
 
-### Running Tests
-```bash
-pytest
-```
-
-### Code Formatting
-```bash
-black .
-```
-
-### Linting
-```bash
-flake8
-```
+Edit `app/core/sources.py`. Each `Source` needs a `base_url`; if you know the
+site's WordPress category slug for its notices/classifieds section (check its
+nav or an example post's `article:section` meta tag), set `category_slug` for
+a tighter, faster scrape. Leaving it `None` scans recent posts site-wide and
+relies entirely on the keyword filter in `app/core/keywords.py`.
 
 ## Deployment
 
-For production deployment, consider using:
-- Gunicorn with Uvicorn workers
-- Environment variables for configuration
-- A production-grade database (PostgreSQL recommended)
+- Backend: Uvicorn/Gunicorn behind a reverse proxy, or any host that runs a
+  long-lived Python process (the scheduler needs the process to stay up)
+- DB: SQLite is fine at this scale; swap `DATABASE_URL` for PostgreSQL if needed

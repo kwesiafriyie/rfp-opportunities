@@ -1,23 +1,22 @@
-import os
+from typing import List
 from pydantic import BaseSettings
-from typing import Optional
+
 
 class Settings(BaseSettings):
-    PROJECT_NAME: str = "RFP Opportunities"
-    DATABASE_URL: str = "sqlite:///./tender_jobs.db"
-    
-    # Authentication
-    SECRET_KEY: str = "your-secret-key-here"
-    ALGORITHM: str = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
-    
+    PROJECT_NAME: str = "Consulting Opportunities"
+    DATABASE_URL: str = "sqlite:///./opportunities.db"
+
     # CORS
-    BACKEND_CORS_ORIGINS: list = ["*"]
-    
+    BACKEND_CORS_ORIGINS: List[str] = ["*"]
+
+    # Scraping
+    SCRAPE_ON_STARTUP: bool = True
+    SCRAPE_HOUR_UTC: int = 6  # daily scheduled scrape time
+
     class Config:
         env_file = ".env"
         case_sensitive = True
-        env_file_encoding = 'utf-8'
+        env_file_encoding = "utf-8"
 
-# Create instance
+
 settings = Settings()
