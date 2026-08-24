@@ -39,6 +39,8 @@ def run_all(db: Session) -> Tuple[Dict[str, int], List[Opportunity]]:
             summary[source.name] = 0
             continue
 
+        logger.info(f"{source.name}: fetched {len(posts)} recent post(s) before filtering")
+
         added = 0
         for post in posts:
             link = post.get("link")
