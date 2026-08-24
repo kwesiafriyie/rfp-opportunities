@@ -9,7 +9,7 @@ export default function SideNav() {
           C
         </div>
         <div className="min-w-0 text-white">
-          <p className="font-serif text-base font-semibold leading-tight truncate">
+          <p className="text-base font-semibold leading-tight truncate">
             Consulting Opportunities
           </p>
           <p className="text-xs text-slate-400">Opportunity notice tracker</p>

@@ -117,7 +117,7 @@ export default function DashboardHome() {
   return (
     <div className="p-6 md:p-10 max-w-6xl mx-auto">
       <div className="mb-8">
-        <h1 className="font-serif text-3xl md:text-4xl font-semibold text-slate-900">Dashboard</h1>
+        <h1 className="text-3xl md:text-4xl font-semibold text-slate-900">Dashboard</h1>
         <p className="text-slate-500 mt-1">
           Consulting and EOI notices tracked across {SOURCES.length} trusted news sources.
         </p>
