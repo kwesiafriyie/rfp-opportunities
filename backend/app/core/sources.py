@@ -35,6 +35,7 @@ class Source:
     category_slug: Optional[str] = None  # wp_rest only
     feed_path: Optional[str] = None  # rss only
     per_page: int = 20  # wp_rest only -- lower for sites whose server chokes on larger pages
+    max_pages: int = 10  # wp_rest only -- lower for sites that slow down/fail at deeper pagination
     enabled: bool = True
 
 
@@ -43,10 +44,15 @@ SOURCES = [
 
     Source(name="thepoint.gm", base_url="https://thepoint.gm", scraper="thepoint_html"),
 
-    # Confirmed WordPress via /wp-json/wp/v2/posts, but its server times out
-    # or 500s on the default per_page=20 (likely under-resourced hosting --
-    # per_page=1 is fine, per_page=20 500'd after ~50s). Kept small here.
-    # No confirmed notices category, so this scans recent site-wide posts
-    # and relies entirely on the keyword filter.
-    Source(name="foroyaa.net", base_url="https://foroyaa.net", scraper="wp_rest", category_slug=None, per_page=5),
+    # Confirmed WordPress via /wp-json/wp/v2/posts, but its server is fragile:
+    # per_page=20 500'd after ~50s (per_page=1 was instant), and even at
+    # per_page=5 it timed out on page 8 -- looks like a slow/unindexed
+    # under-resourced host that struggles with WordPress's default
+    # OFFSET-based pagination at any depth. Kept both small. No confirmed
+    # notices category, so this scans recent site-wide posts and relies
+    # entirely on the keyword filter.
+    Source(
+        name="foroyaa.net", base_url="https://foroyaa.net", scraper="wp_rest",
+        category_slug=None, per_page=5, max_pages=6,
+    ),
 ]
