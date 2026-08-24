@@ -80,7 +80,7 @@ def run_all(db: Session) -> Tuple[Dict[str, int], List[Opportunity]]:
 def run_all_and_notify(db: Session) -> Dict[str, int]:
     """Scrape all sources, store new opportunities, and email subscribers a
     digest of whatever's new. Email sending is a no-op if there's nothing
-    new or SMTP isn't configured -- see app/services/email_service.py.
+    new or Resend isn't configured -- see app/services/email_service.py.
     """
     summary, new_opportunities = run_all(db)
 

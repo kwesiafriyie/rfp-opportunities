@@ -27,9 +27,12 @@ load.
    - `DATABASE_URL` — the Neon connection string from step 1
    - `BACKEND_CORS_ORIGINS` — leave as `["*"]` for now; you'll tighten this
      to your actual Vercel URL in step 4
-   - `SMTP_USER` / `SMTP_PASSWORD` / `FROM_EMAIL` — optional, only needed for
-     email digests (see `backend/.env.example` for the Gmail App Password
-     setup). Leave blank to skip email entirely.
+   - `RESEND_API_KEY` — optional, only needed for email digests. Sign up
+     free at [resend.com](https://resend.com), create an API key, paste it
+     here. Leave blank to skip email entirely. (Not SMTP -- Render blocks
+     outbound SMTP ports on every plan, so digests go out over Resend's
+     HTTPS API instead; see `backend/.env.example` for details, including
+     the sandbox-mode delivery restriction until you verify a domain.)
 3. Deploy. Once live, note the service URL Render gives you, e.g.
    `https://consulting-opportunities-api.onrender.com`.
 4. Confirm it's up: visit `<that-url>/health` — should return `{"status":"healthy"}`.

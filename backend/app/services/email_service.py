@@ -1,18 +1,22 @@
 """Sends an HTML digest email to subscribers when new consulting
-opportunities are found. Credentials come from environment variables only --
-see backend/.env.example. If SMTP isn't configured, sending is skipped
-(logged, not an error) so the scraper never fails because of email.
+opportunities are found, via the Resend HTTP API (plain SMTP doesn't work
+from Render -- see RESEND_API_KEY in app/core/config.py). Credentials come
+from environment variables only -- see backend/.env.example. If Resend isn't
+configured, sending is skipped (logged, not an error) so the scraper never
+fails because of email.
 """
 import logging
-import smtplib
-from email.message import EmailMessage
 from html import escape
 from typing import List
+
+import requests
 
 from ..core.config import settings
 from ..models.opportunity import Opportunity
 
 logger = logging.getLogger(__name__)
+
+RESEND_API_URL = "https://api.resend.com/emails"
 
 # (background, text) per source, matching the frontend's badge colors. Falls
 # back to a neutral slate for any source not listed here, so a new source
@@ -84,32 +88,39 @@ def _build_html(opportunities: List[Opportunity]) -> str:
 
 def send_digest(opportunities: List[Opportunity], recipients: List[str]) -> None:
     """Email a digest of newly found opportunities to every recipient.
-    No-ops (with a log line) if there's nothing to send or SMTP isn't
-    configured.
+    No-ops (with a log line) if there's nothing to send or Resend isn't
+    configured. Sends one API call per recipient so a single bad address
+    doesn't block the rest.
     """
     if not opportunities or not recipients:
         return
 
     if not settings.EMAIL_ENABLED:
-        logger.info("SMTP not configured (SMTP_USER/SMTP_PASSWORD unset) -- skipping email digest")
+        logger.info("RESEND_API_KEY not configured -- skipping email digest")
         return
 
     count = len(opportunities)
     subject = f"{count} new consulting opportunit{'y' if count == 1 else 'ies'} found"
     html = _build_html(opportunities)
-    from_addr = settings.FROM_EMAIL or settings.SMTP_USER
+    headers = {"Authorization": f"Bearer {settings.RESEND_API_KEY}"}
 
-    try:
-        with smtplib.SMTP_SSL(settings.SMTP_HOST, settings.SMTP_PORT, timeout=20) as server:
-            server.login(settings.SMTP_USER, settings.SMTP_PASSWORD)
-            for recipient in recipients:
-                msg = EmailMessage()
-                msg["Subject"] = subject
-                msg["From"] = from_addr
-                msg["To"] = recipient
-                msg.set_content("View this email in an HTML-compatible client to see the opportunities.")
-                msg.add_alternative(html, subtype="html")
-                server.send_message(msg)
-        logger.info(f"Sent opportunity digest to {len(recipients)} recipient(s)")
-    except Exception as e:
-        logger.error(f"Failed to send email digest: {e}")
+    sent = 0
+    for recipient in recipients:
+        try:
+            response = requests.post(
+                RESEND_API_URL,
+                headers=headers,
+                json={
+                    "from": settings.FROM_EMAIL,
+                    "to": [recipient],
+                    "subject": subject,
+                    "html": html,
+                },
+                timeout=20,
+            )
+            response.raise_for_status()
+            sent += 1
+        except requests.RequestException as e:
+            logger.error(f"Failed to send email digest to {recipient}: {e}")
+
+    logger.info(f"Sent opportunity digest to {sent}/{len(recipients)} recipient(s)")
