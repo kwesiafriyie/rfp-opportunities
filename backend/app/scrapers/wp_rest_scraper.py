@@ -16,7 +16,12 @@ USER_AGENT = "Mozilla/5.0 (compatible; ConsultingOpportunitiesBot/1.0; +https://
 REQUEST_TIMEOUT = 15
 PER_PAGE = 20
 MAX_PAGES = 10
-LOOKBACK_DAYS = 120
+# Notices/EOI categories on these sites post infrequently (standard.gm's
+# "Advertisement" category, for example, went over a year between posts) --
+# too short a window silently filters out everything before the keyword
+# filter ever runs. MAX_PAGES already caps total requests, so a generous
+# window here is cheap.
+LOOKBACK_DAYS = 730
 
 
 def _strip_html(html: str) -> str:
