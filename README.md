@@ -24,7 +24,7 @@ frontend/   Next.js dashboard -- see frontend/README.md
 cd backend
 python -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
-cp .env.example .env   # optional: fill in a Resend API key to enable email digests
+cp .env.example .env   # optional: fill in a SendGrid API key to enable email digests
 uvicorn app.main:app --reload
 ```
 

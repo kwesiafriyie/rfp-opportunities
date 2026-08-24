@@ -33,7 +33,7 @@ backend/
 │   │   ├── tendersgm_scraper.py       # bespoke HTML scraper for tenders.gm
 │   │   ├── gppa_scraper.py            # bespoke API scraper for gppa.gm
 │   │   └── pipeline.py                # runs all sources, dedupes, stores, emails
-│   ├── services/email_service.py  # HTML digest email via Resend's HTTP API
+│   ├── services/email_service.py  # HTML digest email via SendGrid's HTTP API
 │   ├── scheduler.py        # daily scrape via APScheduler
 │   └── main.py
 ├── .env.example
@@ -54,10 +54,10 @@ backend/
    ```
 
 3. Copy `.env.example` to `.env` and fill in whatever you want to override.
-   Everything has a sane default except email: leave `RESEND_API_KEY` blank
-   to disable sending, or fill it in to enable the digest emails (see
-   `.env.example` for Resend setup -- it's an HTTP API, not SMTP, since most
-   PaaS hosts block outbound SMTP).
+   Everything has a sane default except email: leave `SENDGRID_API_KEY`
+   blank to disable sending, or fill it in (with `FROM_EMAIL`) to enable the
+   digest emails (see `.env.example` for SendGrid setup -- it's an HTTP API,
+   not SMTP, since most PaaS hosts block outbound SMTP).
 
 4. Start the development server:
    ```bash
