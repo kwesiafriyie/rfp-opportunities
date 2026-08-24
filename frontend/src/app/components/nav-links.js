@@ -3,7 +3,8 @@ import clsx from "clsx";
 import {
   UserGroupIcon,DocumentTextIcon,
   HomeIcon,ChartBarIcon,
-  DocumentDuplicateIcon,LightBulbIcon
+  DocumentDuplicateIcon,LightBulbIcon,
+  EnvelopeIcon
 } from "@heroicons/react/24/outline";
 
 import { usePathname } from "next/navigation";
@@ -15,6 +16,7 @@ import Link from "next/link";
 const links = [
   { name: "RFPs", href: "/dashboard/explore-rfp", icon: DocumentTextIcon },
   {name: "Analysis", href: "/dashboard/analysis", icon: ChartBarIcon },
+  { name: "Notifications", href: "/dashboard/subscribers", icon: EnvelopeIcon },
   { name: "Suggestions", href: "/dashboard/suggestion", icon: LightBulbIcon },
 ];
 

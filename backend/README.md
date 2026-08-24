@@ -11,19 +11,25 @@ instead.
 ```
 backend/
 ├── app/
-│   ├── api/endpoints/opportunities.py  # GET list/detail, POST refresh
+│   ├── api/endpoints/
+│   │   ├── opportunities.py  # GET list/detail, POST refresh
+│   │   └── subscribers.py    # GET/POST/DELETE email recipients
 │   ├── core/
-│   │   ├── config.py      # settings (DB URL, CORS, scrape schedule)
+│   │   ├── config.py      # settings (DB URL, CORS, scrape schedule, SMTP)
 │   │   ├── sources.py     # the 3 sites being scraped
 │   │   ├── keywords.py    # consulting-opportunity keyword filter
 │   │   └── database.py
-│   ├── models/opportunity.py
+│   ├── models/
+│   │   ├── opportunity.py
+│   │   └── subscriber.py
 │   ├── scrapers/
 │   │   ├── wp_rest_scraper.py  # generic WordPress REST API scraper
 │   │   ├── rss_scraper.py      # generic RSS feed scraper (non-WordPress sites)
-│   │   └── pipeline.py         # runs all sources, dedupes, stores
+│   │   └── pipeline.py         # runs all sources, dedupes, stores, emails
+│   ├── services/email_service.py  # HTML digest email via SMTP
 │   ├── scheduler.py        # daily scrape via APScheduler
 │   └── main.py
+├── .env.example
 └── requirements.txt
 ```
 
@@ -40,11 +46,10 @@ backend/
    pip install -r requirements.txt
    ```
 
-3. (Optional) Create a `.env` file in the backend directory to override defaults:
-   ```
-   DATABASE_URL=sqlite:///./opportunities.db
-   SCRAPE_HOUR_UTC=6
-   ```
+3. Copy `.env.example` to `.env` and fill in whatever you want to override.
+   Everything has a sane default except email: leave `SMTP_USER`/
+   `SMTP_PASSWORD` blank to disable sending, or fill them in to enable the
+   digest emails (see `.env.example` for Gmail App Password setup).
 
 4. Start the development server:
    ```bash
@@ -53,7 +58,9 @@ backend/
 
 On startup the server runs an initial scrape in the background (so the DB
 isn't empty), then re-scrapes daily at `SCRAPE_HOUR_UTC`. You can also trigger
-a scrape manually: `POST /api/opportunities/refresh`.
+a scrape manually: `POST /api/opportunities/refresh`. Every scrape run that
+finds new opportunities emails a digest to everyone in the subscribers list,
+if email is configured.
 
 ## API Documentation
 
@@ -62,6 +69,9 @@ Once running:
 - `GET /api/opportunities/` — list opportunities (`?source=`, `?search=`, `?skip=`, `?limit=`)
 - `GET /api/opportunities/{id}` — single opportunity
 - `POST /api/opportunities/refresh` — trigger an immediate scrape
+- `GET /api/subscribers/` — list email recipients
+- `POST /api/subscribers/` — add a recipient (`{"email": "..."}`)
+- `DELETE /api/subscribers/{id}` — remove a recipient
 
 ## Adding/tuning a source
 
