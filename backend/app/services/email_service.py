@@ -1,9 +1,9 @@
 """Sends an HTML digest email to subscribers when new consulting
-opportunities are found, via the Resend HTTP API (plain SMTP doesn't work
-from Render -- see RESEND_API_KEY in app/core/config.py). Credentials come
-from environment variables only -- see backend/.env.example. If Resend isn't
-configured, sending is skipped (logged, not an error) so the scraper never
-fails because of email.
+opportunities are found, via the SendGrid HTTP API (plain SMTP doesn't work
+from Render -- see SENDGRID_API_KEY in app/core/config.py). Credentials come
+from environment variables only -- see backend/.env.example. If SendGrid
+isn't configured, sending is skipped (logged, not an error) so the scraper
+never fails because of email.
 """
 import logging
 from html import escape
@@ -16,7 +16,7 @@ from ..models.opportunity import Opportunity
 
 logger = logging.getLogger(__name__)
 
-RESEND_API_URL = "https://api.resend.com/emails"
+SENDGRID_API_URL = "https://api.sendgrid.com/v3/mail/send"
 
 # (background, text) per source, matching the frontend's badge colors. Falls
 # back to a neutral slate for any source not listed here, so a new source
@@ -25,6 +25,10 @@ SOURCE_COLORS = {
     "standard.gm": ("#eff6ff", "#1d4ed8"),
     "thepoint.gm": ("#ecfdf5", "#047857"),
     "foroyaa.net": ("#f5f3ff", "#6d28d9"),
+    "dailyobservergambia.com": ("#fff1f2", "#e11d48"),
+    "gambiatenders.com": ("#fffbeb", "#d97706"),
+    "tenders.gm": ("#ecfeff", "#0891b2"),
+    "gppa.gm": ("#f0fdfa", "#0d9488"),
 }
 DEFAULT_SOURCE_COLOR = ("#f1f5f9", "#475569")
 
@@ -88,7 +92,7 @@ def _build_html(opportunities: List[Opportunity]) -> str:
 
 def send_digest(opportunities: List[Opportunity], recipients: List[str]) -> None:
     """Email a digest of newly found opportunities to every recipient.
-    No-ops (with a log line) if there's nothing to send or Resend isn't
+    No-ops (with a log line) if there's nothing to send or SendGrid isn't
     configured. Sends one API call per recipient so a single bad address
     doesn't block the rest.
     """
@@ -96,31 +100,32 @@ def send_digest(opportunities: List[Opportunity], recipients: List[str]) -> None
         return
 
     if not settings.EMAIL_ENABLED:
-        logger.info("RESEND_API_KEY not configured -- skipping email digest")
+        logger.info("SENDGRID_API_KEY/FROM_EMAIL not configured -- skipping email digest")
         return
 
     count = len(opportunities)
     subject = f"{count} new consulting opportunit{'y' if count == 1 else 'ies'} found"
     html = _build_html(opportunities)
-    headers = {"Authorization": f"Bearer {settings.RESEND_API_KEY}"}
+    headers = {"Authorization": f"Bearer {settings.SENDGRID_API_KEY}"}
 
     sent = 0
     for recipient in recipients:
         try:
             response = requests.post(
-                RESEND_API_URL,
+                SENDGRID_API_URL,
                 headers=headers,
                 json={
-                    "from": settings.FROM_EMAIL,
-                    "to": [recipient],
+                    "personalizations": [{"to": [{"email": recipient}]}],
+                    "from": {"email": settings.FROM_EMAIL},
                     "subject": subject,
-                    "html": html,
+                    "content": [{"type": "text/html", "value": html}],
                 },
                 timeout=20,
             )
             response.raise_for_status()
             sent += 1
         except requests.RequestException as e:
-            logger.error(f"Failed to send email digest to {recipient}: {e}")
+            detail = e.response.text if e.response is not None else str(e)
+            logger.error(f"Failed to send email digest to {recipient}: {detail}")
 
     logger.info(f"Sent opportunity digest to {sent}/{len(recipients)} recipient(s)")

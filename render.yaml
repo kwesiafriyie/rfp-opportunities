@@ -36,9 +36,11 @@ services:
         value: "false"
       - key: SCRAPE_HOUR_UTC
         value: "6"
-      # Email digest via Resend (https://resend.com) -- plain SMTP doesn't
-      # work here since Render blocks outbound SMTP ports on every plan.
-      - key: RESEND_API_KEY
+      # Email digest via SendGrid (https://sendgrid.com) -- plain SMTP
+      # doesn't work here since Render blocks outbound SMTP ports on every
+      # plan. FROM_EMAIL must be a SendGrid "Single Sender" verified email
+      # (no domain/DNS needed -- see backend/.env.example).
+      - key: SENDGRID_API_KEY
         sync: false
       - key: FROM_EMAIL
-        value: onboarding@resend.dev
+        sync: false
