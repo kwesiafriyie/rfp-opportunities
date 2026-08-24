@@ -5,7 +5,7 @@ from apscheduler.triggers.cron import CronTrigger
 
 from .core.config import settings
 from .core.database import SessionLocal
-from .scrapers.pipeline import run_all
+from .scrapers.pipeline import run_all_and_notify
 
 logger = logging.getLogger(__name__)
 scheduler = BackgroundScheduler()
@@ -14,7 +14,7 @@ scheduler = BackgroundScheduler()
 def _run_job():
     db = SessionLocal()
     try:
-        run_all(db)
+        run_all_and_notify(db)
     finally:
         db.close()
 

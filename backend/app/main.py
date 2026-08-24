@@ -4,11 +4,11 @@ import threading
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from .api.endpoints import opportunities
+from .api.endpoints import opportunities, subscribers
 from .core.config import settings
 from .core.database import Base, SessionLocal, engine
 from .scheduler import start_scheduler
-from .scrapers.pipeline import run_all
+from .scrapers.pipeline import run_all_and_notify
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
@@ -33,6 +33,11 @@ app.include_router(
     prefix="/api/opportunities",
     tags=["opportunities"],
 )
+app.include_router(
+    subscribers.router,
+    prefix="/api/subscribers",
+    tags=["subscribers"],
+)
 
 
 @app.get("/health")
@@ -43,7 +48,7 @@ async def health_check():
 def _initial_scrape():
     db = SessionLocal()
     try:
-        run_all(db)
+        run_all_and_notify(db)
     finally:
         db.close()
 

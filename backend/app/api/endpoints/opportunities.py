@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from ...core.database import SessionLocal, get_db
 from ...models.opportunity import Opportunity
-from ...scrapers.pipeline import run_all
+from ...scrapers.pipeline import run_all_and_notify
 
 router = APIRouter()
 
@@ -47,7 +47,7 @@ async def get_opportunity(opportunity_id: int, db: Session = Depends(get_db)):
 def _refresh_task():
     db = SessionLocal()
     try:
-        run_all(db)
+        run_all_and_notify(db)
     finally:
         db.close()
 
