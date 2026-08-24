@@ -23,6 +23,7 @@ const SOURCE_COLORS = {
   "dailyobservergambia.com": "#e11d48",
   "gambiatenders.com": "#d97706",
   "tenders.gm": "#0891b2",
+  "gppa.gm": "#0d9488",
 };
 
 const CHART_OPTIONS = {

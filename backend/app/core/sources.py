@@ -30,6 +30,12 @@ Each site is scraped one of three ways:
   app/scrapers/tendersgm_scraper.py). Custom (Next.js) but server-rendered,
   so no browser automation needed. Filters out closed tenders itself.
 
+- "gppa_api": bespoke scraper for gppa.gm (see app/scrapers/gppa_scraper.py).
+  gppa.gm's tender page is a client-side-rendered Next.js app with no data
+  in the static HTML; this calls the same public Strapi CMS API
+  (cms.gppa.gm) its own frontend calls. Filters out awarded/closed/
+  cancelled tenders itself.
+
 Either way, every post that comes back still has to pass the consulting
 keyword filter (app/core/keywords.py) before it's stored.
 """
@@ -41,7 +47,7 @@ from typing import Optional
 class Source:
     name: str
     base_url: str
-    scraper: str = "wp_rest"  # "wp_rest", "rss", "thepoint_html", "gambiatenders_html", or "tendersgm_html"
+    scraper: str = "wp_rest"  # "wp_rest", "rss", "thepoint_html", "gambiatenders_html", "tendersgm_html", or "gppa_api"
     category_slug: Optional[str] = None  # wp_rest only
     feed_path: Optional[str] = None  # rss only
     per_page: int = 20  # wp_rest only -- lower for sites whose server chokes on larger pages
@@ -76,4 +82,6 @@ SOURCES = [
     Source(name="gambiatenders.com", base_url="https://www.gambiatenders.com", scraper="gambiatenders_html"),
 
     Source(name="tenders.gm", base_url="https://tenders.gm", scraper="tendersgm_html"),
+
+    Source(name="gppa.gm", base_url="https://gppa.gm", scraper="gppa_api"),
 ]

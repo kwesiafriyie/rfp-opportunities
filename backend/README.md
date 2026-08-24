@@ -1,12 +1,13 @@
 # Consulting Opportunities Backend
 
 FastAPI backend that scrapes standard.gm, thepoint.gm, foroyaa.net,
-dailyobservergambia.com, gambiatenders.com, and tenders.gm for
+dailyobservergambia.com, gambiatenders.com, tenders.gm, and gppa.gm for
 consulting/EOI/RFP notices, stores matches in SQLite (or Postgres in
 production), and serves them to the frontend. standard.gm, foroyaa.net, and
 dailyobservergambia.com are scraped via WordPress's built-in REST API;
 thepoint.gm, gambiatenders.com, and tenders.gm are each custom-built sites
-with a bespoke HTML scraper.
+with a bespoke HTML scraper; gppa.gm is a client-side-rendered app scraped
+via its own public CMS API instead.
 
 ## Project Structure
 
@@ -30,6 +31,7 @@ backend/
 │   │   ├── thepoint_scraper.py        # bespoke HTML scraper for thepoint.gm
 │   │   ├── gambiatenders_scraper.py   # bespoke HTML scraper for gambiatenders.com
 │   │   ├── tendersgm_scraper.py       # bespoke HTML scraper for tenders.gm
+│   │   ├── gppa_scraper.py            # bespoke API scraper for gppa.gm
 │   │   └── pipeline.py                # runs all sources, dedupes, stores, emails
 │   ├── services/email_service.py  # HTML digest email via Resend's HTTP API
 │   ├── scheduler.py        # daily scrape via APScheduler

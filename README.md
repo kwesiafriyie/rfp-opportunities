@@ -6,8 +6,9 @@ notifications.
 
 Currently tracking [standard.gm](https://standard.gm), [thepoint.gm](https://thepoint.gm),
 [foroyaa.net](https://foroyaa.net), [dailyobservergambia.com](https://dailyobservergambia.com),
-[gambiatenders.com](https://www.gambiatenders.com), and [tenders.gm](https://tenders.gm);
-built to add more sources over time.
+[gambiatenders.com](https://www.gambiatenders.com), [tenders.gm](https://tenders.gm), and
+[gppa.gm](https://gppa.gm) (Gambia Public Procurement Authority); built to add more sources
+over time.
 
 ## Structure
 
