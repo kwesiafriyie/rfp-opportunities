@@ -5,7 +5,9 @@ keyword, and serves them through a web dashboard with optional email digest
 notifications.
 
 Currently tracking [standard.gm](https://standard.gm), [thepoint.gm](https://thepoint.gm),
-and [foroyaa.net](https://foroyaa.net); built to add more sources over time.
+[foroyaa.net](https://foroyaa.net), [dailyobservergambia.com](https://dailyobservergambia.com),
+[gambiatenders.com](https://www.gambiatenders.com), and [tenders.gm](https://tenders.gm);
+built to add more sources over time.
 
 ## Structure
 

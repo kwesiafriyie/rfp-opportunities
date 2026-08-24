@@ -1,10 +1,12 @@
 # Consulting Opportunities Backend
 
-FastAPI backend that scrapes standard.gm, thepoint.gm, and foroyaa.net for
-consulting/EOI/RFP notices, stores matches in SQLite, and serves them to the
-frontend. standard.gm and foroyaa.net are scraped via WordPress's built-in
-REST API; thepoint.gm isn't WordPress, so it's scraped via its RSS feed
-instead.
+FastAPI backend that scrapes standard.gm, thepoint.gm, foroyaa.net,
+dailyobservergambia.com, gambiatenders.com, and tenders.gm for
+consulting/EOI/RFP notices, stores matches in SQLite (or Postgres in
+production), and serves them to the frontend. standard.gm, foroyaa.net, and
+dailyobservergambia.com are scraped via WordPress's built-in REST API;
+thepoint.gm, gambiatenders.com, and tenders.gm are each custom-built sites
+with a bespoke HTML scraper.
 
 ## Project Structure
 
@@ -23,9 +25,12 @@ backend/
 │   │   ├── opportunity.py
 │   │   └── subscriber.py
 │   ├── scrapers/
-│   │   ├── wp_rest_scraper.py  # generic WordPress REST API scraper
-│   │   ├── rss_scraper.py      # generic RSS feed scraper (non-WordPress sites)
-│   │   └── pipeline.py         # runs all sources, dedupes, stores, emails
+│   │   ├── wp_rest_scraper.py         # generic WordPress REST API scraper
+│   │   ├── rss_scraper.py             # generic RSS feed scraper (unused currently)
+│   │   ├── thepoint_scraper.py        # bespoke HTML scraper for thepoint.gm
+│   │   ├── gambiatenders_scraper.py   # bespoke HTML scraper for gambiatenders.com
+│   │   ├── tendersgm_scraper.py       # bespoke HTML scraper for tenders.gm
+│   │   └── pipeline.py                # runs all sources, dedupes, stores, emails
 │   ├── services/email_service.py  # HTML digest email via Resend's HTTP API
 │   ├── scheduler.py        # daily scrape via APScheduler
 │   └── main.py

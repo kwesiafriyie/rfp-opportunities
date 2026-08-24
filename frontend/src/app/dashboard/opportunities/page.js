@@ -4,7 +4,14 @@ import OpportunityCard from "@/app/components/opportunity-card";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { API_URL } from "@/app/lib/api";
 
-const SOURCES = ["standard.gm", "thepoint.gm", "foroyaa.net"];
+const SOURCES = [
+  "standard.gm",
+  "thepoint.gm",
+  "foroyaa.net",
+  "dailyobservergambia.com",
+  "gambiatenders.com",
+  "tenders.gm",
+];
 
 export default function OpportunitiesPage() {
   const [opportunities, setOpportunities] = useState([]);
