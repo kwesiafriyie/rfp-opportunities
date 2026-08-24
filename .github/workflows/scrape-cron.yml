@@ -1,0 +1,24 @@
+name: Daily opportunity scrape
+
+# Triggers the deployed backend's scrape instead of relying on its
+# in-process scheduler, which requires the process to already be awake at
+# SCRAPE_HOUR_UTC. This works even on a free/spin-down hosting tier: hitting
+# the endpoint wakes the service, which then runs the scrape in the
+# background (see backend/app/api/endpoints/opportunities.py).
+#
+# Requires a repo secret BACKEND_URL set to the deployed backend's base URL,
+# e.g. https://consulting-opportunities-api.onrender.com (no trailing slash).
+
+on:
+  schedule:
+    - cron: "0 7 * * *" # 07:00 UTC daily
+  workflow_dispatch: {} # allows manually triggering a run from the Actions tab
+
+jobs:
+  trigger-refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger backend refresh
+        run: |
+          curl -sS -X POST "${{ secrets.BACKEND_URL }}/api/opportunities/refresh" \
+            --max-time 90 --retry 2 --retry-delay 15 --fail
