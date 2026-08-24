@@ -9,6 +9,11 @@ class Settings(BaseSettings):
 
     # CORS
     BACKEND_CORS_ORIGINS: List[str] = ["*"]
+    # Optional regex for additional allowed origins -- e.g. Vercel preview
+    # deployments get a fresh URL per push, so BACKEND_CORS_ORIGINS alone
+    # (an exact-match list) would need updating on every deploy. Leave blank
+    # to disable.
+    BACKEND_CORS_ORIGIN_REGEX: str = ""
 
     # Scraping
     SCRAPE_ON_STARTUP: bool = True
