@@ -1,35 +1,28 @@
 import Link from "next/link";
 import NavLinks from "./nav-links";
-import { PowerIcon } from "@heroicons/react/24/outline";
 
 export default function SideNav() {
   return (
-    <div className="flex h-full flex-col px-4 py-6 md:px-6 md:py-8 bg-gradient-to-tl from-blue-600 to-purple-600">
-      {/* Logo/Title Section */}
-      <Link
-        className="mb-6 flex items-center justify-start rounded-lg bg-gradient-to-r from-blue-600 to-purple-700 p-6 transition-all hover:scale-105 transform"
-        href="/"
-      >
-        <div className="text-white">
-          <p className="text-3xl font-bold tracking-wide drop-shadow-lg md:text-4xl">Opportunities</p>
-          <p className="text-sm text-blue-200 md:text-base">Explore your potential</p>
+    <div className="flex h-full flex-col bg-slate-900 px-4 py-6 md:px-5 md:py-8">
+      <Link href="/dashboard" className="mb-8 flex items-center gap-3 px-2">
+        <div className="flex h-9 w-9 flex-none items-center justify-center rounded-lg bg-amber-500 font-serif text-lg font-bold text-slate-900">
+          C
+        </div>
+        <div className="min-w-0 text-white">
+          <p className="font-serif text-base font-semibold leading-tight truncate">
+            Consulting Opportunities
+          </p>
+          <p className="text-xs text-slate-400">Gambia notices tracker</p>
         </div>
       </Link>
 
-      {/* Navigation Links */}
-      <div className="flex flex-row space-x-4 md:flex-col md:space-y-4 grow">
+      <div className="flex grow flex-row space-x-2 md:flex-col md:space-y-1 md:space-x-0">
         <NavLinks />
-
-        {/* Sign Out Button */}
-        <form>
-          <button className="flex items-center justify-start gap-3 p-3 rounded-md bg-gray-100 text-gray-700 text-sm font-medium transition-all hover:bg-sky-100 hover:text-blue-600 md:w-auto md:justify-start">
-            <PowerIcon className="w-6" />
-            <span className="hidden md:block">Sign Out</span>
-          </button>
-        </form>
       </div>
+
+      <p className="hidden px-2 text-xs text-slate-500 md:block">
+        Tracking standard.gm, thepoint.gm &amp; foroyaa.net
+      </p>
     </div>
   );
 }
-
-

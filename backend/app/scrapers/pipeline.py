@@ -18,7 +18,7 @@ def _scrape_source(source: Source):
         return fetch_rss_posts(source.base_url, source.feed_path)
     if source.scraper == "thepoint_html":
         return fetch_thepoint_posts(source.base_url)
-    return fetch_posts(source.base_url, source.category_slug)
+    return fetch_posts(source.base_url, source.category_slug, per_page=source.per_page, max_pages=source.max_pages)
 
 
 def run_all(db: Session) -> Tuple[Dict[str, int], List[Opportunity]]:

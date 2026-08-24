@@ -4,6 +4,7 @@ enabled -- no HTML selectors, no browser automation.
 """
 import logging
 import re
+import time
 from datetime import datetime, timedelta, timezone
 from html import unescape
 from typing import Dict, List, Optional
@@ -13,9 +14,14 @@ import requests
 logger = logging.getLogger(__name__)
 
 USER_AGENT = "Mozilla/5.0 (compatible; ConsultingOpportunitiesBot/1.0; +https://github.com/)"
-REQUEST_TIMEOUT = 15
-PER_PAGE = 20
+REQUEST_TIMEOUT = 20
+DEFAULT_PER_PAGE = 20
 MAX_PAGES = 10
+# Only request the fields we actually use. WordPress returns full rendered
+# post content by default, which is a lot of unused payload/server work per
+# post -- on at least one target site, requesting per_page=20 with full
+# content timed out/500'd where per_page=1 was instant.
+FIELDS = "id,date_gmt,link,title,excerpt"
 # Notices/EOI categories on these sites post infrequently (standard.gm's
 # "Advertisement" category, for example, went over a year between posts) --
 # too short a window silently filters out everything before the keyword
@@ -45,14 +51,21 @@ def _get_category_id(base_url: str, slug: str) -> Optional[int]:
         return None
 
 
-def fetch_posts(base_url: str, category_slug: Optional[str] = None) -> List[Dict]:
+def fetch_posts(
+    base_url: str,
+    category_slug: Optional[str] = None,
+    per_page: int = DEFAULT_PER_PAGE,
+    max_pages: int = MAX_PAGES,
+) -> List[Dict]:
     """Fetch recent posts from a WordPress site, newest first.
 
     If category_slug is given, scope to that category. Otherwise scan recent
     posts site-wide. Stops once posts older than LOOKBACK_DAYS are reached,
-    or MAX_PAGES is hit, whichever comes first.
+    or max_pages is hit, whichever comes first. Lower per_page and/or
+    max_pages for sites whose server struggles under WordPress's default
+    payload size or deep OFFSET-based pagination.
     """
-    params = {"orderby": "date", "order": "desc"}
+    params = {"orderby": "date", "order": "desc", "_fields": FIELDS}
 
     if category_slug:
         category_id = _get_category_id(base_url, category_slug)
@@ -64,11 +77,17 @@ def fetch_posts(base_url: str, category_slug: Optional[str] = None) -> List[Dict
     cutoff = datetime.now(timezone.utc) - timedelta(days=LOOKBACK_DAYS)
     posts: List[Dict] = []
 
-    for page in range(1, MAX_PAGES + 1):
+    for page in range(1, max_pages + 1):
+        if page > 1:
+            # Be a little polite between paginated requests -- also gives
+            # slower/rate-limited hosts breathing room instead of hammering
+            # them back-to-back.
+            time.sleep(1)
+
         try:
             resp = requests.get(
                 f"{base_url}/wp-json/wp/v2/posts",
-                params={**params, "per_page": PER_PAGE, "page": page},
+                params={**params, "per_page": per_page, "page": page},
                 headers={"User-Agent": USER_AGENT},
                 timeout=REQUEST_TIMEOUT,
             )
@@ -106,7 +125,7 @@ def fetch_posts(base_url: str, category_slug: Optional[str] = None) -> List[Dict
                 "published_at": published_dt,
             })
 
-        if reached_cutoff or len(batch) < PER_PAGE:
+        if reached_cutoff or len(batch) < per_page:
             break
 
     return posts

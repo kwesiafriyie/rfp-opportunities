@@ -1,4 +1,4 @@
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Fraunces } from "next/font/google";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -11,16 +11,22 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const fraunces = Fraunces({
+  variable: "--font-display",
+  subsets: ["latin"],
+  weight: ["600", "700", "900"],
+});
+
 export const metadata = {
   title: "Consulting Opportunities",
-  description: "Consulting and EOI notices scraped from Gambian news sites",
+  description: "Consulting and EOI notices tracked across Gambian news sites",
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${fraunces.variable} antialiased`}
       >
         {children}
       </body>
