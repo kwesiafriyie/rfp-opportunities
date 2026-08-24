@@ -1,6 +1,8 @@
 from datetime import datetime, timezone
+from html import escape
 
 from fastapi import APIRouter, Depends, HTTPException, Response
+from fastapi.responses import HTMLResponse
 from pydantic import BaseModel, EmailStr
 from sqlalchemy.orm import Session
 
@@ -60,6 +62,28 @@ async def send_test_email(db: Session = Depends(get_db)):
     )
     send_digest([sample], recipients)
     return {"status": "test email sent", "recipients": len(recipients)}
+
+
+@router.get("/unsubscribe", response_class=HTMLResponse)
+async def unsubscribe(email: str, db: Session = Depends(get_db)):
+    """One-click unsubscribe link used in the digest email's footer -- plain
+    GET so it works from a link click in any email client, no login/JS
+    needed. Always returns a friendly confirmation page (idempotent) rather
+    than erroring if the email was already removed.
+    """
+    subscriber = db.query(Subscriber).filter(Subscriber.email == email.lower()).first()
+    if subscriber:
+        db.delete(subscriber)
+        db.commit()
+
+    return f"""
+    <html>
+      <body style="font-family:-apple-system,'Segoe UI',Roboto,Arial,sans-serif;text-align:center;padding:48px 24px;color:#1e293b;">
+        <h1 style="font-size:20px;">You've been unsubscribed</h1>
+        <p style="color:#64748b;">{escape(email)} will no longer receive Consulting Opportunities digest emails.</p>
+      </body>
+    </html>
+    """
 
 
 @router.delete("/{subscriber_id}", status_code=204)
