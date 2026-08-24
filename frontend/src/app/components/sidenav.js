@@ -12,7 +12,7 @@ export default function SideNav() {
           <p className="font-serif text-base font-semibold leading-tight truncate">
             Consulting Opportunities
           </p>
-          <p className="text-xs text-slate-400">Gambia notices tracker</p>
+          <p className="text-xs text-slate-400">Opportunity notice tracker</p>
         </div>
       </Link>
 

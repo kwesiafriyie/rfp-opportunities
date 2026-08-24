@@ -19,7 +19,7 @@ const fraunces = Fraunces({
 
 export const metadata = {
   title: "Consulting Opportunities",
-  description: "Consulting and EOI notices tracked across Gambian news sites",
+  description: "Consulting and EOI notices tracked across trusted news sources",
 };
 
 export default function RootLayout({ children }) {

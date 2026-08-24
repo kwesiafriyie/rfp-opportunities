@@ -14,6 +14,16 @@ from ..models.opportunity import Opportunity
 
 logger = logging.getLogger(__name__)
 
+# (background, text) per source, matching the frontend's badge colors. Falls
+# back to a neutral slate for any source not listed here, so a new source
+# doesn't need an email-template change to render correctly.
+SOURCE_COLORS = {
+    "standard.gm": ("#eff6ff", "#1d4ed8"),
+    "thepoint.gm": ("#ecfdf5", "#047857"),
+    "foroyaa.net": ("#f5f3ff", "#6d28d9"),
+}
+DEFAULT_SOURCE_COLOR = ("#f1f5f9", "#475569")
+
 
 def _format_date(opportunity: Opportunity) -> str:
     if not opportunity.published_at:
@@ -22,18 +32,19 @@ def _format_date(opportunity: Opportunity) -> str:
 
 
 def _build_html(opportunities: List[Opportunity]) -> str:
+    sources = sorted({o.source for o in opportunities})
     rows = "".join(
         f"""
         <tr>
-          <td style="padding:16px 20px;border-bottom:1px solid #e5e7eb;">
-            <a href="{escape(o.link)}" style="color:#2563eb;text-decoration:none;font-weight:600;font-size:15px;line-height:1.4;">
+          <td style="padding:18px 24px;border-bottom:1px solid #e2e8f0;border-left:3px solid {SOURCE_COLORS.get(o.source, DEFAULT_SOURCE_COLOR)[1]};">
+            <a href="{escape(o.link)}" style="color:#0f172a;text-decoration:none;font-weight:600;font-size:17px;line-height:1.4;font-family:Georgia,'Times New Roman',serif;">
               {escape(o.title)}
             </a>
-            <div style="margin-top:6px;">
-              <span style="display:inline-block;background:#eff6ff;color:#2563eb;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.3px;padding:2px 8px;border-radius:999px;">
+            <div style="margin-top:8px;">
+              <span style="display:inline-block;background:{SOURCE_COLORS.get(o.source, DEFAULT_SOURCE_COLOR)[0]};color:{SOURCE_COLORS.get(o.source, DEFAULT_SOURCE_COLOR)[1]};font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.4px;padding:3px 9px;border-radius:4px;">
                 {escape(o.source)}
               </span>
-              <span style="color:#9ca3af;font-size:12px;margin-left:8px;">{_format_date(o)}</span>
+              <span style="color:#94a3b8;font-size:13px;margin-left:10px;">{_format_date(o)}</span>
             </div>
           </td>
         </tr>
@@ -44,19 +55,24 @@ def _build_html(opportunities: List[Opportunity]) -> str:
     count = len(opportunities)
     return f"""
     <html>
-      <body style="margin:0;padding:24px 16px;background:#f3f4f6;font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;">
-        <div style="max-width:600px;margin:0 auto;">
-          <div style="background:linear-gradient(135deg,#2563eb,#7c3aed);border-radius:16px 16px 0 0;padding:28px 24px;text-align:center;">
-            <h1 style="color:#ffffff;margin:0;font-size:20px;">New Consulting Opportunities</h1>
-            <p style="color:#dbeafe;margin:8px 0 0;font-size:13px;">
-              {count} new notice{'s' if count != 1 else ''} found across standard.gm, thepoint.gm, and foroyaa.net
+      <body style="margin:0;padding:32px 16px;background:#f1f5f9;font-family:-apple-system,'Segoe UI',Roboto,Arial,sans-serif;">
+        <div style="max-width:600px;margin:0 auto;background:#ffffff;border-radius:8px;overflow:hidden;border:1px solid #e2e8f0;">
+          <div style="background:#0f172a;padding:28px 28px 24px;">
+            <p style="color:#f59e0b;margin:0 0 8px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;">
+              New Notices
+            </p>
+            <h1 style="color:#ffffff;margin:0;font-size:26px;font-family:Georgia,'Times New Roman',serif;font-weight:700;">
+              {count} Consulting Opportunit{'y' if count == 1 else 'ies'}
+            </h1>
+            <p style="color:#94a3b8;margin:10px 0 0;font-size:14px;">
+              Found across {len(sources)} source{'s' if len(sources) != 1 else ''}: {escape(", ".join(sources))}
             </p>
           </div>
-          <table role="presentation" style="width:100%;border-collapse:collapse;background:#ffffff;">
+          <table role="presentation" style="width:100%;border-collapse:collapse;">
             {rows}
           </table>
-          <div style="background:#ffffff;border-radius:0 0 16px 16px;padding:18px 24px;text-align:center;border-top:1px solid #e5e7eb;">
-            <p style="color:#9ca3af;font-size:12px;margin:0;">
+          <div style="padding:20px 24px;text-align:center;background:#f8fafc;border-top:1px solid #e2e8f0;">
+            <p style="color:#94a3b8;font-size:12px;margin:0;">
               You're receiving this because your email is subscribed to Consulting Opportunities updates.
             </p>
           </div>
