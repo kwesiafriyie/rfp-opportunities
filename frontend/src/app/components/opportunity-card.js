@@ -8,6 +8,7 @@ const SOURCE_STYLES = {
   "dailyobservergambia.com": "bg-rose-50 text-rose-700 ring-rose-600/20",
   "gambiatenders.com": "bg-amber-50 text-amber-700 ring-amber-600/20",
   "tenders.gm": "bg-cyan-50 text-cyan-700 ring-cyan-600/20",
+  "gppa.gm": "bg-teal-50 text-teal-700 ring-teal-600/20",
 };
 
 const formatDate = (iso) => {

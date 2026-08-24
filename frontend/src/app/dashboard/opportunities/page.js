@@ -11,6 +11,7 @@ const SOURCES = [
   "dailyobservergambia.com",
   "gambiatenders.com",
   "tenders.gm",
+  "gppa.gm",
 ];
 
 export default function OpportunitiesPage() {
