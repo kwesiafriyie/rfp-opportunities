@@ -16,7 +16,19 @@ import {
 ChartJS.register(CategoryScale, LinearScale, BarElement, PointElement, LineElement, Title, Tooltip, Legend);
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-const SOURCE_COLORS = ["rgba(59,130,246,0.6)", "rgba(16,185,129,0.6)", "rgba(249,115,22,0.6)"];
+const SOURCE_COLORS = {
+  "standard.gm": "#2563eb",
+  "thepoint.gm": "#059669",
+  "foroyaa.net": "#7c3aed",
+};
+
+const CHART_OPTIONS = {
+  plugins: { legend: { display: false } },
+  scales: {
+    x: { grid: { display: false } },
+    y: { beginAtZero: true, ticks: { precision: 0 }, grid: { color: "#f1f5f9" } },
+  },
+};
 
 export default function AnalyticsPage() {
   const [opportunities, setOpportunities] = useState([]);
@@ -39,8 +51,8 @@ export default function AnalyticsPage() {
     fetchData();
   }, []);
 
-  if (loading) return <div className="p-8 text-center">Loading analytics...</div>;
-  if (error) return <div className="p-8 text-center text-red-500">Error: {error}</div>;
+  if (loading) return <div className="p-10 text-center text-slate-400">Loading analytics...</div>;
+  if (error) return <div className="p-10 text-center text-red-500">Error: {error}</div>;
 
   const sourceCounts = opportunities.reduce((acc, o) => {
     acc[o.source] = (acc[o.source] || 0) + 1;
@@ -53,7 +65,9 @@ export default function AnalyticsPage() {
       {
         label: "Opportunities by source",
         data: Object.values(sourceCounts),
-        backgroundColor: SOURCE_COLORS.slice(0, Object.keys(sourceCounts).length),
+        backgroundColor: Object.keys(sourceCounts).map((s) => SOURCE_COLORS[s] || "#94a3b8"),
+        borderRadius: 6,
+        maxBarThickness: 56,
       },
     ],
   };
@@ -71,28 +85,36 @@ export default function AnalyticsPage() {
       {
         label: "Opportunities over time",
         data: Object.values(monthCounts),
-        borderColor: "rgba(59,130,246,1)",
-        backgroundColor: "rgba(59,130,246,0.3)",
+        borderColor: "#d97706",
+        backgroundColor: "rgba(217, 119, 6, 0.12)",
         tension: 0.4,
         fill: true,
+        pointRadius: 3,
+        pointBackgroundColor: "#d97706",
       },
     ],
   };
 
   return (
-    <div className="p-8">
-      <h1 className="text-2xl font-bold text-center mb-6 text-gray-700">Opportunities Analytics</h1>
+    <div className="p-6 md:p-10 max-w-6xl mx-auto">
+      <div className="mb-8">
+        <h1 className="font-serif text-3xl md:text-4xl font-semibold text-slate-900">Analytics</h1>
+        <p className="text-slate-500 mt-1">How opportunities break down by source and time.</p>
+      </div>
+
       {opportunities.length === 0 ? (
-        <p className="text-center text-gray-500">No data yet.</p>
+        <div className="bg-white border border-slate-200 rounded-xl p-12 text-center text-slate-400">
+          No data yet.
+        </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-white shadow-lg rounded-lg p-4">
-            <h2 className="text-lg font-semibold mb-4 text-gray-500">By Source</h2>
-            <Bar data={barData} />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="bg-white border border-slate-200 rounded-xl p-6">
+            <h2 className="font-semibold text-slate-800 mb-4">By Source</h2>
+            <Bar data={barData} options={CHART_OPTIONS} />
           </div>
-          <div className="bg-white shadow-lg rounded-lg p-4">
-            <h2 className="text-lg font-semibold mb-4 text-gray-500">Trend Over Time</h2>
-            <Line data={lineData} />
+          <div className="bg-white border border-slate-200 rounded-xl p-6">
+            <h2 className="font-semibold text-slate-800 mb-4">Trend Over Time</h2>
+            <Line data={lineData} options={CHART_OPTIONS} />
           </div>
         </div>
       )}

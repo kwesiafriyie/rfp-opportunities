@@ -1,23 +1,21 @@
 "use client";
 import clsx from "clsx";
 import {
-  UserGroupIcon,DocumentTextIcon,
-  HomeIcon,ChartBarIcon,
-  DocumentDuplicateIcon,LightBulbIcon,
-  EnvelopeIcon
+  HomeIcon,
+  DocumentTextIcon,
+  ChartBarIcon,
+  EnvelopeIcon,
 } from "@heroicons/react/24/outline";
 
 import { usePathname } from "next/navigation";
 
 import Link from "next/link";
 
-// Map of links to display in the side navigation.
-// Depending on the size of the application, this would be stored in a database.
 const links = [
-  { name: "RFPs", href: "/dashboard/explore-rfp", icon: DocumentTextIcon },
-  {name: "Analysis", href: "/dashboard/analysis", icon: ChartBarIcon },
+  { name: "Dashboard", href: "/dashboard", icon: HomeIcon },
+  { name: "Opportunities", href: "/dashboard/opportunities", icon: DocumentTextIcon },
+  { name: "Analytics", href: "/dashboard/analysis", icon: ChartBarIcon },
   { name: "Notifications", href: "/dashboard/subscribers", icon: EnvelopeIcon },
-  { name: "Suggestions", href: "/dashboard/suggestion", icon: LightBulbIcon },
 ];
 
 export default function NavLinks() {
@@ -26,18 +24,19 @@ export default function NavLinks() {
     <>
       {links.map((link) => {
         const LinkIcon = link.icon;
+        const active = pathname === link.href;
         return (
           <Link
             key={link.name}
             href={link.href}
             className={clsx(
-              "flex h-[48px] grow items-center text-gray-500 justify-center gap-1 rounded-md bg-gray-100 p-3 text-sm font-medium hover:bg-sky-200 hover:text-blue-500 md:flex-none md:justify-start md:p-2 md:px-3",
+              "flex h-[46px] grow items-center gap-3 rounded-lg px-3 text-sm font-medium text-slate-400 transition-colors hover:bg-slate-800 hover:text-white md:flex-none md:justify-start",
               {
-                "bg-sky-200 text-blue-500": pathname === link.href,
+                "bg-slate-800 text-white": active,
               }
             )}
           >
-            <LinkIcon className="w-6" />
+            <LinkIcon className="w-5 h-5 flex-none" />
             <p className="hidden md:block">{link.name}</p>
           </Link>
         );
