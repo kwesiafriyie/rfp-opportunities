@@ -12,10 +12,10 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
+import { API_URL } from "@/app/lib/api";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, PointElement, LineElement, Title, Tooltip, Legend);
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 const SOURCE_COLORS = {
   "standard.gm": "#2563eb",
   "thepoint.gm": "#059669",
