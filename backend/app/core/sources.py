@@ -34,6 +34,7 @@ class Source:
     scraper: str = "wp_rest"  # "wp_rest", "rss", or "thepoint_html"
     category_slug: Optional[str] = None  # wp_rest only
     feed_path: Optional[str] = None  # rss only
+    per_page: int = 20  # wp_rest only -- lower for sites whose server chokes on larger pages
     enabled: bool = True
 
 
@@ -42,10 +43,10 @@ SOURCES = [
 
     Source(name="thepoint.gm", base_url="https://thepoint.gm", scraper="thepoint_html"),
 
-    # TODO: confirm whether foroyaa.net is WordPress (check
-    # foroyaa.net/wp-json/wp/v2/posts?per_page=1) or has an RSS feed. Until
-    # confirmed, this scans recent site-wide WP REST posts (best-effort
-    # guess) and relies entirely on the keyword filter, per instruction to
-    # just search by keyword here rather than scope to a category.
-    Source(name="foroyaa.net", base_url="https://foroyaa.net", scraper="wp_rest", category_slug=None),
+    # Confirmed WordPress via /wp-json/wp/v2/posts, but its server times out
+    # or 500s on the default per_page=20 (likely under-resourced hosting --
+    # per_page=1 is fine, per_page=20 500'd after ~50s). Kept small here.
+    # No confirmed notices category, so this scans recent site-wide posts
+    # and relies entirely on the keyword filter.
+    Source(name="foroyaa.net", base_url="https://foroyaa.net", scraper="wp_rest", category_slug=None, per_page=5),
 ]
