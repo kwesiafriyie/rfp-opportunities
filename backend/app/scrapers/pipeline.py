@@ -6,7 +6,9 @@ from sqlalchemy.orm import Session
 from ..core.keywords import find_matched_keywords
 from ..core.sources import SOURCES, Source
 from ..models.opportunity import Opportunity
+from .gambiatenders_scraper import fetch_posts as fetch_gambiatenders_posts
 from .rss_scraper import fetch_rss_posts
+from .tendersgm_scraper import fetch_posts as fetch_tendersgm_posts
 from .thepoint_scraper import fetch_posts as fetch_thepoint_posts
 from .wp_rest_scraper import fetch_posts
 
@@ -18,6 +20,10 @@ def _scrape_source(source: Source):
         return fetch_rss_posts(source.base_url, source.feed_path)
     if source.scraper == "thepoint_html":
         return fetch_thepoint_posts(source.base_url)
+    if source.scraper == "gambiatenders_html":
+        return fetch_gambiatenders_posts(source.base_url)
+    if source.scraper == "tendersgm_html":
+        return fetch_tendersgm_posts(source.base_url)
     return fetch_posts(source.base_url, source.category_slug, per_page=source.per_page, max_pages=source.max_pages)
 
 

@@ -20,6 +20,16 @@ Each site is scraped one of three ways:
   API, and its RSS feed doesn't cover the category we need, so this scrapes
   its "Advertisements" category listing page directly.
 
+- "gambiatenders_html": bespoke scraper for gambiatenders.com (see
+  app/scrapers/gambiatenders_scraper.py). Custom tender aggregator, no REST
+  API. Listing cards give title-only (no excerpt), so keyword matching runs
+  on the title alone -- an acceptable trade-off since the site is already
+  scoped to tenders/procurement, unlike a general news site.
+
+- "tendersgm_html": bespoke scraper for tenders.gm (see
+  app/scrapers/tendersgm_scraper.py). Custom (Next.js) but server-rendered,
+  so no browser automation needed. Filters out closed tenders itself.
+
 Either way, every post that comes back still has to pass the consulting
 keyword filter (app/core/keywords.py) before it's stored.
 """
@@ -31,7 +41,7 @@ from typing import Optional
 class Source:
     name: str
     base_url: str
-    scraper: str = "wp_rest"  # "wp_rest", "rss", or "thepoint_html"
+    scraper: str = "wp_rest"  # "wp_rest", "rss", "thepoint_html", "gambiatenders_html", or "tendersgm_html"
     category_slug: Optional[str] = None  # wp_rest only
     feed_path: Optional[str] = None  # rss only
     per_page: int = 20  # wp_rest only -- lower for sites whose server chokes on larger pages
@@ -55,4 +65,15 @@ SOURCES = [
         name="foroyaa.net", base_url="https://foroyaa.net", scraper="wp_rest",
         category_slug=None, per_page=5, max_pages=6,
     ),
+
+    # Confirmed WordPress via /wp-json/wp/v2/posts. "business" is the
+    # category slug used at /category/business/.
+    Source(
+        name="dailyobservergambia.com", base_url="https://dailyobservergambia.com",
+        scraper="wp_rest", category_slug="business",
+    ),
+
+    Source(name="gambiatenders.com", base_url="https://www.gambiatenders.com", scraper="gambiatenders_html"),
+
+    Source(name="tenders.gm", base_url="https://tenders.gm", scraper="tendersgm_html"),
 ]

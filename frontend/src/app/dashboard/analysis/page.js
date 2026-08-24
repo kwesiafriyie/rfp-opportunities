@@ -20,6 +20,9 @@ const SOURCE_COLORS = {
   "standard.gm": "#2563eb",
   "thepoint.gm": "#059669",
   "foroyaa.net": "#7c3aed",
+  "dailyobservergambia.com": "#e11d48",
+  "gambiatenders.com": "#d97706",
+  "tenders.gm": "#0891b2",
 };
 
 const CHART_OPTIONS = {
