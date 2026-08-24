@@ -59,7 +59,7 @@ export default function OpportunitiesPage() {
         <h1 className="font-serif text-3xl md:text-4xl font-semibold text-slate-900">Opportunities</h1>
         <p className="text-slate-500 mt-1">
           {opportunities.length} consulting {opportunities.length === 1 ? "notice" : "notices"} found
-          across standard.gm, thepoint.gm, and foroyaa.net.
+          across {SOURCES.length} trusted news sources.
         </p>
       </div>
 

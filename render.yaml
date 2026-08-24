@@ -1,0 +1,42 @@
+# Render Blueprint -- https://render.com/docs/blueprint-spec
+#
+# Deploys the backend only. The frontend is deployed separately on Vercel
+# (see DEPLOYMENT.md).
+#
+# After connecting this repo in the Render dashboard, it'll prompt for the
+# env vars below marked `sync: false` -- fill those in there, never commit
+# real values to this file.
+services:
+  - type: web
+    name: consulting-opportunities-api
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      # Postgres connection string from Neon/Supabase/etc, e.g.
+      # postgresql://user:pass@host/dbname
+      - key: DATABASE_URL
+        sync: false
+      # JSON array of allowed origins -- pydantic parses this as JSON, not a
+      # plain string, e.g. ["https://your-app.vercel.app"]
+      - key: BACKEND_CORS_ORIGINS
+        sync: false
+      # false in production -- scraping is triggered by the scheduled
+      # GitHub Actions workflow (see .github/workflows/scrape-cron.yml)
+      # hitting /api/opportunities/refresh, not by every cold start.
+      - key: SCRAPE_ON_STARTUP
+        value: "false"
+      - key: SCRAPE_HOUR_UTC
+        value: "6"
+      - key: SMTP_HOST
+        value: smtp.gmail.com
+      - key: SMTP_PORT
+        value: "465"
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASSWORD
+        sync: false
+      - key: FROM_EMAIL
+        sync: false

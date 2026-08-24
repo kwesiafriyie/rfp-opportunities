@@ -1,5 +1,5 @@
 """
-The three Gambian news sites this system watches for consulting opportunities.
+The news sites this system watches for consulting opportunities.
 
 Each site is scraped one of three ways:
 

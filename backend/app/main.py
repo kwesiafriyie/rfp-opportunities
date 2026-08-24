@@ -16,7 +16,7 @@ Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
-    description="API for consulting opportunities scraped from Gambian news sites",
+    description="API for consulting opportunities scraped from trusted news sources",
     version="1.0.0",
 )
 

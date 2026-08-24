@@ -107,7 +107,7 @@ export default function DashboardHome() {
       <div className="mb-8">
         <h1 className="font-serif text-3xl md:text-4xl font-semibold text-slate-900">Dashboard</h1>
         <p className="text-slate-500 mt-1">
-          Consulting and EOI notices tracked across three Gambian news sites.
+          Consulting and EOI notices tracked across {SOURCES.length} trusted news sources.
         </p>
       </div>
 
