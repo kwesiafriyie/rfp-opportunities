@@ -23,6 +23,12 @@ services:
       # plain string, e.g. ["https://your-app.vercel.app"]
       - key: BACKEND_CORS_ORIGINS
         sync: false
+      # Optional: regex matching additional allowed origins, useful because
+      # Vercel gives every preview deployment a new URL. E.g. for a project
+      # called "frontend" under Vercel team "your-team-projects":
+      # ^https://frontend(-[a-zA-Z0-9]+)*-your-team-projects\.vercel\.app$
+      - key: BACKEND_CORS_ORIGIN_REGEX
+        sync: false
       # false in production -- scraping is triggered by the scheduled
       # GitHub Actions workflow (see .github/workflows/scrape-cron.yml)
       # hitting /api/opportunities/refresh, not by every cold start.

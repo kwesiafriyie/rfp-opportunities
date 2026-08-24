@@ -46,8 +46,22 @@ load.
 ## 4. Lock down CORS
 
 Back in Render, update the backend's `BACKEND_CORS_ORIGINS` env var to your
-actual Vercel URL as a JSON array — e.g. `["https://your-app.vercel.app"]`
-(this must be valid JSON; a plain string will crash the app on boot). Redeploy.
+actual Vercel production URL as a JSON array — e.g.
+`["https://your-app.vercel.app"]` (this must be valid JSON; a plain string
+will crash the app on boot).
+
+Vercel also gives every preview deployment (any push not promoted to
+production) its own unique URL, e.g.
+`https://frontend-9q1tyf65w-your-team-projects.vercel.app` — those won't
+match the exact-match list above. If you want previews to work against the
+API too, also set `BACKEND_CORS_ORIGIN_REGEX` to a pattern scoped to your
+Vercel project, e.g. for project `frontend` under team `your-team-projects`:
+
+```
+^https://frontend(-[a-zA-Z0-9]+)*-your-team-projects\.vercel\.app$
+```
+
+Redeploy after changing either var.
 
 ## 5. Set up the scrape schedule
 
