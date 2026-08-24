@@ -1,8 +1,10 @@
 # Consulting Opportunities Backend
 
 FastAPI backend that scrapes standard.gm, thepoint.gm, and foroyaa.net for
-consulting/EOI/RFP notices via each site's WordPress REST API, stores matches
-in SQLite, and serves them to the frontend.
+consulting/EOI/RFP notices, stores matches in SQLite, and serves them to the
+frontend. standard.gm and foroyaa.net are scraped via WordPress's built-in
+REST API; thepoint.gm isn't WordPress, so it's scraped via its RSS feed
+instead.
 
 ## Project Structure
 
@@ -18,6 +20,7 @@ backend/
 │   ├── models/opportunity.py
 │   ├── scrapers/
 │   │   ├── wp_rest_scraper.py  # generic WordPress REST API scraper
+│   │   ├── rss_scraper.py      # generic RSS feed scraper (non-WordPress sites)
 │   │   └── pipeline.py         # runs all sources, dedupes, stores
 │   ├── scheduler.py        # daily scrape via APScheduler
 │   └── main.py
@@ -62,11 +65,21 @@ Once running:
 
 ## Adding/tuning a source
 
-Edit `app/core/sources.py`. Each `Source` needs a `base_url`; if you know the
-site's WordPress category slug for its notices/classifieds section (check its
-nav or an example post's `article:section` meta tag), set `category_slug` for
-a tighter, faster scrape. Leaving it `None` scans recent posts site-wide and
-relies entirely on the keyword filter in `app/core/keywords.py`.
+Edit `app/core/sources.py`. Each `Source` needs a `base_url` and a `scraper`
+type:
+
+- `"wp_rest"` (WordPress sites): if you know the site's WordPress category
+  slug for its notices/classifieds section (check its nav, or an example
+  post's `article:section` meta tag / breadcrumb), set `category_slug` for a
+  tighter, faster scrape. Leaving it `None` scans recent posts site-wide and
+  relies entirely on the keyword filter in `app/core/keywords.py`.
+- `"rss"` (non-WordPress sites): set `feed_path` to the site's RSS feed path
+  (look for `<link rel="alternate" type="application/rss+xml">` in an example
+  page's `<head>`). No category scoping -- relies entirely on the keyword
+  filter.
+
+Either way, confirm the site isn't WordPress before reaching for RSS: check
+`<base_url>/wp-json/wp/v2/posts?per_page=1` in a browser first.
 
 ## Deployment
 

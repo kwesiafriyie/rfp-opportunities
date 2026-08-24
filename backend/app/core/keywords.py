@@ -11,7 +11,9 @@ from typing import List
 # not to false-positive inside unrelated text.
 _PHRASES = [
     "expression of interest",
+    "expressions of interest",
     "request for proposal",
+    "request for proposals",
     "individual consultant",
     "consulting services",
     "terms of reference",

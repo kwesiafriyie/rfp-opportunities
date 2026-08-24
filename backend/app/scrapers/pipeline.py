@@ -4,11 +4,18 @@ from typing import Dict
 from sqlalchemy.orm import Session
 
 from ..core.keywords import find_matched_keywords
-from ..core.sources import SOURCES
+from ..core.sources import SOURCES, Source
 from ..models.opportunity import Opportunity
+from .rss_scraper import fetch_rss_posts
 from .wp_rest_scraper import fetch_posts
 
 logger = logging.getLogger(__name__)
+
+
+def _scrape_source(source: Source):
+    if source.scraper == "rss":
+        return fetch_rss_posts(source.base_url, source.feed_path)
+    return fetch_posts(source.base_url, source.category_slug)
 
 
 def run_all(db: Session) -> Dict[str, int]:
@@ -24,7 +31,7 @@ def run_all(db: Session) -> Dict[str, int]:
 
         logger.info(f"Scraping {source.name}...")
         try:
-            posts = fetch_posts(source.base_url, source.category_slug)
+            posts = _scrape_source(source)
         except Exception as e:
             logger.error(f"Scrape failed for {source.name}: {e}")
             summary[source.name] = 0
