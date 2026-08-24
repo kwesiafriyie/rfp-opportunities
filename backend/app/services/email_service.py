@@ -8,6 +8,7 @@ never fails because of email.
 import logging
 from html import escape
 from typing import List
+from urllib.parse import quote
 
 import requests
 
@@ -39,7 +40,41 @@ def _format_date(opportunity: Opportunity) -> str:
     return opportunity.published_at.strftime("%b %d, %Y")
 
 
-def _build_html(opportunities: List[Opportunity]) -> str:
+def _build_footer(recipient: str) -> str:
+    """Builds the compliance footer (physical address + unsubscribe link),
+    personalized per recipient. Spam filters specifically look for these
+    elements on bulk/opt-in email -- their absence reads as spammy.
+    """
+    address_line = (
+        f'<p style="color:#94a3b8;font-size:12px;margin:0 0 8px;">{escape(settings.MAILING_ADDRESS)}</p>'
+        if settings.MAILING_ADDRESS
+        else ""
+    )
+
+    if settings.BACKEND_PUBLIC_URL:
+        unsubscribe_url = (
+            f"{settings.BACKEND_PUBLIC_URL}/api/subscribers/unsubscribe"
+            f"?email={quote(recipient)}"
+        )
+        unsubscribe_line = (
+            f'<a href="{escape(unsubscribe_url)}" style="color:#64748b;text-decoration:underline;">'
+            f"Unsubscribe</a>"
+        )
+    else:
+        unsubscribe_line = "Contact us to unsubscribe."
+
+    return f"""
+    <div style="padding:20px 24px;text-align:center;background:#f8fafc;border-top:1px solid #e2e8f0;">
+      <p style="color:#94a3b8;font-size:12px;margin:0 0 8px;">
+        You're receiving this because your email is subscribed to Consulting Opportunities updates.
+      </p>
+      {address_line}
+      <p style="color:#94a3b8;font-size:12px;margin:0;">{unsubscribe_line}</p>
+    </div>
+    """
+
+
+def _build_html(opportunities: List[Opportunity], recipient: str) -> str:
     sources = sorted({o.source for o in opportunities})
     rows = "".join(
         f"""
@@ -79,11 +114,7 @@ def _build_html(opportunities: List[Opportunity]) -> str:
           <table role="presentation" style="width:100%;border-collapse:collapse;">
             {rows}
           </table>
-          <div style="padding:20px 24px;text-align:center;background:#f8fafc;border-top:1px solid #e2e8f0;">
-            <p style="color:#94a3b8;font-size:12px;margin:0;">
-              You're receiving this because your email is subscribed to Consulting Opportunities updates.
-            </p>
-          </div>
+          {_build_footer(recipient)}
         </div>
       </body>
     </html>
@@ -105,7 +136,6 @@ def send_digest(opportunities: List[Opportunity], recipients: List[str]) -> None
 
     count = len(opportunities)
     subject = f"{count} new consulting opportunit{'y' if count == 1 else 'ies'} found"
-    html = _build_html(opportunities)
     headers = {"Authorization": f"Bearer {settings.SENDGRID_API_KEY}"}
 
     sent = 0
@@ -118,7 +148,7 @@ def send_digest(opportunities: List[Opportunity], recipients: List[str]) -> None
                     "personalizations": [{"to": [{"email": recipient}]}],
                     "from": {"email": settings.FROM_EMAIL},
                     "subject": subject,
-                    "content": [{"type": "text/html", "value": html}],
+                    "content": [{"type": "text/html", "value": _build_html(opportunities, recipient)}],
                 },
                 timeout=20,
             )

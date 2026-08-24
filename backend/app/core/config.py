@@ -28,6 +28,16 @@ class Settings(BaseSettings):
     # environment variables / .env, never hardcoded.
     SENDGRID_API_KEY: str = ""
     FROM_EMAIL: str = ""
+    # Physical mailing address shown in every digest's footer -- required by
+    # anti-spam law (CAN-SPAM/CASL) for this kind of bulk/opt-in email, and
+    # its presence also tends to help deliverability (its absence reads as
+    # spammy to filters). Leave blank to omit -- but note that likely hurts
+    # deliverability more than it helps.
+    MAILING_ADDRESS: str = ""
+    # This backend's own public URL (e.g. the Render service URL), used to
+    # build a one-click unsubscribe link in each digest's footer. Leave
+    # blank to omit the link (falls back to a plain-text explanation).
+    BACKEND_PUBLIC_URL: str = ""
 
     @property
     def EMAIL_ENABLED(self) -> bool:
