@@ -19,17 +19,17 @@ class Settings(BaseSettings):
     SCRAPE_ON_STARTUP: bool = True
     SCRAPE_HOUR_UTC: int = 6  # daily scheduled scrape time
 
-    # Email digest -- leave SMTP_USER/SMTP_PASSWORD unset to disable sending.
-    # Credentials must come from environment variables / .env, never hardcoded.
-    SMTP_HOST: str = "smtp.gmail.com"
-    SMTP_PORT: int = 465
-    SMTP_USER: str = ""
-    SMTP_PASSWORD: str = ""
-    FROM_EMAIL: str = ""
+    # Email digest, sent via the Resend HTTP API (https://resend.com) --
+    # plain SMTP doesn't work here since Render blocks outbound SMTP ports
+    # (25/465/587) on every plan. Leave RESEND_API_KEY unset to disable
+    # sending. Credentials must come from environment variables / .env,
+    # never hardcoded.
+    RESEND_API_KEY: str = ""
+    FROM_EMAIL: str = "onboarding@resend.dev"
 
     @property
     def EMAIL_ENABLED(self) -> bool:
-        return bool(self.SMTP_USER and self.SMTP_PASSWORD)
+        return bool(self.RESEND_API_KEY)
 
     class Config:
         env_file = ".env"

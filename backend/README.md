@@ -15,7 +15,7 @@ backend/
 │   │   ├── opportunities.py  # GET list/detail, POST refresh
 │   │   └── subscribers.py    # GET/POST/DELETE email recipients
 │   ├── core/
-│   │   ├── config.py      # settings (DB URL, CORS, scrape schedule, SMTP)
+│   │   ├── config.py      # settings (DB URL, CORS, scrape schedule, email)
 │   │   ├── sources.py     # the 3 sites being scraped
 │   │   ├── keywords.py    # consulting-opportunity keyword filter
 │   │   └── database.py
@@ -26,7 +26,7 @@ backend/
 │   │   ├── wp_rest_scraper.py  # generic WordPress REST API scraper
 │   │   ├── rss_scraper.py      # generic RSS feed scraper (non-WordPress sites)
 │   │   └── pipeline.py         # runs all sources, dedupes, stores, emails
-│   ├── services/email_service.py  # HTML digest email via SMTP
+│   ├── services/email_service.py  # HTML digest email via Resend's HTTP API
 │   ├── scheduler.py        # daily scrape via APScheduler
 │   └── main.py
 ├── .env.example
@@ -47,9 +47,10 @@ backend/
    ```
 
 3. Copy `.env.example` to `.env` and fill in whatever you want to override.
-   Everything has a sane default except email: leave `SMTP_USER`/
-   `SMTP_PASSWORD` blank to disable sending, or fill them in to enable the
-   digest emails (see `.env.example` for Gmail App Password setup).
+   Everything has a sane default except email: leave `RESEND_API_KEY` blank
+   to disable sending, or fill it in to enable the digest emails (see
+   `.env.example` for Resend setup -- it's an HTTP API, not SMTP, since most
+   PaaS hosts block outbound SMTP).
 
 4. Start the development server:
    ```bash
