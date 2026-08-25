@@ -1,5 +1,5 @@
 import React from "react";
-import { CalendarIcon, ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
+import { CalendarIcon, ClockIcon, ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
 
 export const SOURCE_STYLES = {
   "standard.gm": "bg-blue-50 text-blue-700 ring-blue-600/20",
@@ -25,7 +25,8 @@ export const formatDate = (iso) => {
 // site, with its own click handler stopping propagation so it doesn't also
 // trigger the modal.
 const OpportunityCard = ({ opportunity, onOpen }) => {
-  const { title, excerpt, published_at, source, link, matched_keywords = [] } = opportunity;
+  const { title, excerpt, published_at, deadline, source, link, matched_keywords = [] } = opportunity;
+  const deadlinePassed = deadline && new Date(deadline) < new Date();
   const sourceStyle = SOURCE_STYLES[source] || "bg-slate-100 text-slate-600 ring-slate-500/20";
 
   const handleKeyDown = (e) => {
@@ -50,6 +51,16 @@ const OpportunityCard = ({ opportunity, onOpen }) => {
         >
           {source}
         </span>
+        {deadline && (
+          <span
+            className={`inline-flex items-center gap-1 text-[11px] font-semibold ${
+              deadlinePassed ? "text-slate-400" : "text-amber-600"
+            }`}
+          >
+            <ClockIcon className="w-3.5 h-3.5" />
+            {formatDate(deadline)}
+          </span>
+        )}
       </div>
 
       <h3 className="text-lg font-semibold text-slate-900 leading-snug line-clamp-2 mb-2">{title}</h3>

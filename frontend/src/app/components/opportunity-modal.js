@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect } from "react";
-import { XMarkIcon, CalendarIcon, ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
+import { XMarkIcon, CalendarIcon, ClockIcon, ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
 import { SOURCE_STYLES, formatDate } from "./opportunity-card";
 
 // Single shared modal, rendered once at the page level and driven by
@@ -24,7 +24,7 @@ export default function OpportunityModal({ opportunity, onClose }) {
 
   if (!opportunity) return null;
 
-  const { title, excerpt, published_at, source, link, matched_keywords = [] } = opportunity;
+  const { title, excerpt, published_at, deadline, source, link, matched_keywords = [] } = opportunity;
   const sourceStyle = SOURCE_STYLES[source] || "bg-slate-100 text-slate-600 ring-slate-500/20";
 
   return (
@@ -58,9 +58,21 @@ export default function OpportunityModal({ opportunity, onClose }) {
         </div>
 
         <div className="px-6 py-5 overflow-y-auto">
-          <div className="flex items-center gap-1.5 text-sm text-slate-500 mb-4">
-            <CalendarIcon className="w-4 h-4" />
-            {formatDate(published_at)}
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-sm text-slate-500 mb-4">
+            <span className="flex items-center gap-1.5">
+              <CalendarIcon className="w-4 h-4" />
+              {formatDate(published_at)}
+            </span>
+            {deadline && (
+              <span
+                className={`flex items-center gap-1.5 font-medium ${
+                  new Date(deadline) < new Date() ? "text-slate-400" : "text-amber-600"
+                }`}
+              >
+                <ClockIcon className="w-4 h-4" />
+                Deadline: {formatDate(deadline)}
+              </span>
+            )}
           </div>
 
           <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-line">

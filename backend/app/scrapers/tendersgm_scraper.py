@@ -17,6 +17,8 @@ from urllib.parse import urljoin
 import requests
 from bs4 import BeautifulSoup
 
+from .date_utils import parse_deadline
+
 logger = logging.getLogger(__name__)
 
 USER_AGENT = "Mozilla/5.0 (compatible; ConsultingOpportunitiesBot/1.0; +https://github.com/)"
@@ -42,9 +44,11 @@ def fetch_posts(base_url: str) -> List[Dict]:
         if not title_link:
             continue
 
-        closing_p = card.select_one("div.mt-auto > p")
-        if closing_p and closing_p.get_text(strip=True).startswith("Closed:"):
+        closing_text = closing_p.get_text(strip=True) if (closing_p := card.select_one("div.mt-auto > p")) else ""
+        if closing_text.startswith("Closed:"):
             continue  # skip expired tenders
+
+        deadline = parse_deadline(closing_text.split(":", 1)[-1]) if closing_text else None
 
         category_el = card.select_one("span.bg-success-soft")
         org_el = card.select_one("p svg + span")
@@ -62,6 +66,7 @@ def fetch_posts(base_url: str) -> List[Dict]:
             "link": urljoin(base_url, title_link["href"]),
             "excerpt": " ".join(p for p in excerpt_parts if p)[:500],
             "published_at": None,
+            "deadline": deadline,
         })
 
     return candidates

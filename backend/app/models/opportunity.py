@@ -11,6 +11,7 @@ class Opportunity(Base):
     link = Column(String, unique=True, index=True, nullable=False)
     excerpt = Column(Text)
     published_at = Column(DateTime(timezone=True))
+    deadline = Column(DateTime(timezone=True), nullable=True)
     matched_keywords = Column(String)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
@@ -22,6 +23,7 @@ class Opportunity(Base):
             "link": self.link,
             "excerpt": self.excerpt,
             "published_at": self.published_at.isoformat() if self.published_at else None,
+            "deadline": self.deadline.isoformat() if self.deadline else None,
             "matched_keywords": self.matched_keywords.split(",") if self.matched_keywords else [],
             "created_at": self.created_at.isoformat() if self.created_at else None,
         }

@@ -6,13 +6,14 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .api.endpoints import opportunities, subscribers
 from .core.config import settings
-from .core.database import Base, SessionLocal, engine
+from .core.database import Base, SessionLocal, engine, sync_schema
 from .scheduler import start_scheduler
 from .scrapers.pipeline import run_all_and_notify
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
 Base.metadata.create_all(bind=engine)
+sync_schema()
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
