@@ -75,7 +75,7 @@ export default function SubscribersPage() {
         <div className="inline-flex items-center justify-center w-11 h-11 rounded-xl bg-amber-100 text-amber-600 mb-4">
           <EnvelopeIcon className="w-6 h-6" />
         </div>
-        <h1 className="font-serif text-3xl md:text-4xl font-semibold text-slate-900">Notifications</h1>
+        <h1 className="text-3xl md:text-4xl font-semibold text-slate-900">Notifications</h1>
         <p className="text-slate-500 mt-1">
           Everyone below gets an email digest whenever new consulting opportunities are found.
         </p>
