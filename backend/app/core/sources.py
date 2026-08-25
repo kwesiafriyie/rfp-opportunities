@@ -36,6 +36,12 @@ Each site is scraped one of three ways:
   (cms.gppa.gm) its own frontend calls. Filters out awarded/closed/
   cancelled tenders itself.
 
+- "ppa_html": bespoke scraper for Ghana's Public Procurement Authority
+  portal, tenders.ppa.gov.gh (see app/scrapers/ppa_scraper.py). Server-
+  rendered HTML, no browser automation needed. Scrapes both the /eois and
+  /tenders (RFP) listing pages and merges them under this one source,
+  since they're the same portal with identical markup.
+
 Either way, every post that comes back still has to pass the consulting
 keyword filter (app/core/keywords.py) before it's stored.
 """
@@ -47,7 +53,7 @@ from typing import Optional
 class Source:
     name: str
     base_url: str
-    scraper: str = "wp_rest"  # "wp_rest", "rss", "thepoint_html", "gambiatenders_html", "tendersgm_html", or "gppa_api"
+    scraper: str = "wp_rest"  # "wp_rest", "rss", "thepoint_html", "gambiatenders_html", "tendersgm_html", "gppa_api", or "ppa_html"
     category_slug: Optional[str] = None  # wp_rest only
     feed_path: Optional[str] = None  # rss only
     per_page: int = 20  # wp_rest only -- lower for sites whose server chokes on larger pages
@@ -84,4 +90,6 @@ SOURCES = [
     Source(name="tenders.gm", base_url="https://tenders.gm", scraper="tendersgm_html"),
 
     Source(name="gppa.gm", base_url="https://gppa.gm", scraper="gppa_api"),
+
+    Source(name="tenders.ppa.gov.gh", base_url="https://tenders.ppa.gov.gh", scraper="ppa_html"),
 ]

@@ -13,6 +13,7 @@ const SOURCES = [
   "gambiatenders.com",
   "tenders.gm",
   "gppa.gm",
+  "tenders.ppa.gov.gh",
 ];
 
 export default function OpportunitiesPage() {

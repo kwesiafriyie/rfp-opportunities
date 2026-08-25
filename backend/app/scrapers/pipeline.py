@@ -8,6 +8,7 @@ from ..core.sources import SOURCES, Source
 from ..models.opportunity import Opportunity
 from .gambiatenders_scraper import fetch_posts as fetch_gambiatenders_posts
 from .gppa_scraper import fetch_posts as fetch_gppa_posts
+from .ppa_scraper import fetch_posts as fetch_ppa_posts
 from .rss_scraper import fetch_rss_posts
 from .tendersgm_scraper import fetch_posts as fetch_tendersgm_posts
 from .thepoint_scraper import fetch_posts as fetch_thepoint_posts
@@ -27,6 +28,8 @@ def _scrape_source(source: Source):
         return fetch_tendersgm_posts(source.base_url)
     if source.scraper == "gppa_api":
         return fetch_gppa_posts(source.base_url)
+    if source.scraper == "ppa_html":
+        return fetch_ppa_posts(source.base_url)
     return fetch_posts(source.base_url, source.category_slug, per_page=source.per_page, max_pages=source.max_pages)
 
 
