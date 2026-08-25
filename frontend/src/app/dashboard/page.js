@@ -7,8 +7,11 @@ import {
   ClockIcon,
   EnvelopeIcon,
   ArrowRightIcon,
+  ArrowTopRightOnSquareIcon,
 } from "@heroicons/react/24/outline";
 import { API_URL } from "@/app/lib/api";
+import { SOURCE_STYLES, formatDate } from "@/app/components/opportunity-card";
+import OpportunityModal from "@/app/components/opportunity-modal";
 
 const SOURCES = [
   "standard.gm",
@@ -19,24 +22,6 @@ const SOURCES = [
   "tenders.gm",
   "gppa.gm",
 ];
-const SOURCE_STYLES = {
-  "standard.gm": "bg-blue-50 text-blue-700 ring-blue-600/20",
-  "thepoint.gm": "bg-emerald-50 text-emerald-700 ring-emerald-600/20",
-  "foroyaa.net": "bg-violet-50 text-violet-700 ring-violet-600/20",
-  "dailyobservergambia.com": "bg-rose-50 text-rose-700 ring-rose-600/20",
-  "gambiatenders.com": "bg-amber-50 text-amber-700 ring-amber-600/20",
-  "tenders.gm": "bg-cyan-50 text-cyan-700 ring-cyan-600/20",
-  "gppa.gm": "bg-teal-50 text-teal-700 ring-teal-600/20",
-};
-
-function formatDate(iso) {
-  if (!iso) return "Date unknown";
-  return new Date(iso).toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
-}
 
 function SourceBadge({ source }) {
   return (
@@ -71,6 +56,7 @@ export default function DashboardHome() {
   const [subscriberCount, setSubscriberCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [selected, setSelected] = useState(null);
 
   useEffect(() => {
     const load = async () => {
@@ -148,14 +134,38 @@ export default function DashboardHome() {
           ) : (
             <ul className="divide-y divide-slate-100">
               {recent.map((o) => (
-                <li key={o.link} className="hover:bg-slate-50 transition-colors">
-                  <a href={o.link} target="_blank" rel="noopener noreferrer" className="block px-6 py-4">
-                    <p className="text-sm font-medium text-slate-800 line-clamp-1">{o.title}</p>
-                    <div className="mt-1.5 flex items-center gap-2">
-                      <SourceBadge source={o.source} />
-                      <span className="text-xs text-slate-400">{formatDate(o.published_at)}</span>
+                <li key={o.link}>
+                  <div
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => setSelected(o)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        setSelected(o);
+                      }
+                    }}
+                    aria-haspopup="dialog"
+                    className="flex items-center justify-between gap-3 px-6 py-4 cursor-pointer hover:bg-slate-50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-amber-400"
+                  >
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-slate-800 line-clamp-1">{o.title}</p>
+                      <div className="mt-1.5 flex items-center gap-2">
+                        <SourceBadge source={o.source} />
+                        <span className="text-xs text-slate-400">{formatDate(o.published_at)}</span>
+                      </div>
                     </div>
-                  </a>
+                    <a
+                      href={o.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      aria-label={`View "${o.title}" on source`}
+                      className="flex-none p-1.5 rounded-lg text-slate-300 hover:text-amber-600 hover:bg-amber-50 transition-colors"
+                    >
+                      <ArrowTopRightOnSquareIcon className="w-4 h-4" />
+                    </a>
+                  </div>
                 </li>
               ))}
             </ul>
@@ -174,6 +184,8 @@ export default function DashboardHome() {
           </div>
         </div>
       </div>
+
+      <OpportunityModal opportunity={selected} onClose={() => setSelected(null)} />
     </div>
   );
 }
