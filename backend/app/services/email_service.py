@@ -40,6 +40,14 @@ def _format_date(opportunity: Opportunity) -> str:
     return opportunity.published_at.strftime("%b %d, %Y")
 
 
+def _format_deadline(opportunity: Opportunity) -> str:
+    if not opportunity.deadline:
+        return ""
+    return f"""<span style="color:#b45309;font-size:13px;margin-left:10px;font-weight:600;">
+        Deadline: {opportunity.deadline.strftime('%b %d, %Y')}
+      </span>"""
+
+
 def _build_footer(recipient: str) -> str:
     """Builds the compliance footer (physical address + unsubscribe link),
     personalized per recipient. Spam filters specifically look for these
@@ -88,6 +96,7 @@ def _build_html(opportunities: List[Opportunity], recipient: str) -> str:
                 {escape(o.source)}
               </span>
               <span style="color:#94a3b8;font-size:13px;margin-left:10px;">{_format_date(o)}</span>
+              {_format_deadline(o)}
             </div>
           </td>
         </tr>

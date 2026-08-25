@@ -62,6 +62,13 @@ def fetch_posts(base_url: str) -> List[Dict]:
             except ValueError:
                 pass
 
+        deadline = None
+        if item.get("closingDate"):
+            try:
+                deadline = datetime.strptime(item["closingDate"], "%Y-%m-%d").replace(tzinfo=timezone.utc)
+            except ValueError:
+                pass
+
         entity = (item.get("procuringEntity") or {}).get("name", "")
         excerpt_parts = [item.get("category", ""), entity, item.get("overview") or item.get("description", "")]
 
@@ -75,6 +82,7 @@ def fetch_posts(base_url: str) -> List[Dict]:
             "link": f"{base_url}/tenders/notices?tender={item.get('documentId') or item.get('id')}",
             "excerpt": " ".join(p for p in excerpt_parts if p)[:500],
             "published_at": published_at,
+            "deadline": deadline,
         })
 
     return posts

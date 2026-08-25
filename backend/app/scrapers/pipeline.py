@@ -73,6 +73,7 @@ def run_all(db: Session) -> Tuple[Dict[str, int], List[Opportunity]]:
                 link=link,
                 excerpt=post.get("excerpt"),
                 published_at=post.get("published_at"),
+                deadline=post.get("deadline"),
                 matched_keywords=",".join(keywords),
             )
             db.add(opportunity)

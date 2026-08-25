@@ -153,6 +153,16 @@ export default function DashboardHome() {
                       <div className="mt-1.5 flex items-center gap-2">
                         <SourceBadge source={o.source} />
                         <span className="text-xs text-slate-400">{formatDate(o.published_at)}</span>
+                        {o.deadline && (
+                          <span
+                            className={`inline-flex items-center gap-1 text-xs font-semibold ${
+                              new Date(o.deadline) < new Date() ? "text-slate-400" : "text-amber-600"
+                            }`}
+                          >
+                            <ClockIcon className="w-3.5 h-3.5" />
+                            {formatDate(o.deadline)}
+                          </span>
+                        )}
                       </div>
                     </div>
                     <a
