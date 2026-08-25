@@ -1,7 +1,7 @@
 import React from "react";
 import { CalendarIcon, ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
 
-const SOURCE_STYLES = {
+export const SOURCE_STYLES = {
   "standard.gm": "bg-blue-50 text-blue-700 ring-blue-600/20",
   "thepoint.gm": "bg-emerald-50 text-emerald-700 ring-emerald-600/20",
   "foroyaa.net": "bg-violet-50 text-violet-700 ring-violet-600/20",
@@ -11,7 +11,7 @@ const SOURCE_STYLES = {
   "gppa.gm": "bg-teal-50 text-teal-700 ring-teal-600/20",
 };
 
-const formatDate = (iso) => {
+export const formatDate = (iso) => {
   if (!iso) return "Date unknown";
   return new Date(iso).toLocaleDateString(undefined, {
     year: "numeric",
@@ -20,15 +20,29 @@ const formatDate = (iso) => {
   });
 };
 
-const OpportunityCard = ({ title, summary, date, source, link, keywords = [] }) => {
+// Clicking the card body opens the details modal (via onOpen); the "View on
+// Source" link is a separate element that goes straight to the external
+// site, with its own click handler stopping propagation so it doesn't also
+// trigger the modal.
+const OpportunityCard = ({ opportunity, onOpen }) => {
+  const { title, excerpt, published_at, source, link, matched_keywords = [] } = opportunity;
   const sourceStyle = SOURCE_STYLES[source] || "bg-slate-100 text-slate-600 ring-slate-500/20";
 
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      onOpen(opportunity);
+    }
+  };
+
   return (
-    <a
-      href={link}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="group flex flex-col h-full bg-white rounded-xl border border-slate-200 p-5 hover:border-amber-300 hover:shadow-md transition-all"
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={() => onOpen(opportunity)}
+      onKeyDown={handleKeyDown}
+      aria-haspopup="dialog"
+      className="group flex flex-col h-full bg-white rounded-xl border border-slate-200 p-5 cursor-pointer hover:border-amber-300 hover:shadow-md transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
     >
       <div className="flex items-center justify-between mb-3">
         <span
@@ -36,19 +50,16 @@ const OpportunityCard = ({ title, summary, date, source, link, keywords = [] }) 
         >
           {source}
         </span>
-        <ArrowTopRightOnSquareIcon className="w-4 h-4 text-slate-300 group-hover:text-amber-500 transition-colors" />
       </div>
 
-      <h3 className="font-serif text-lg font-semibold text-slate-900 leading-snug line-clamp-2 mb-2">
-        {title}
-      </h3>
+      <h3 className="text-lg font-semibold text-slate-900 leading-snug line-clamp-2 mb-2">{title}</h3>
       <p className="text-sm text-slate-500 line-clamp-3 flex-grow">
-        {summary || "No description available."}
+        {excerpt || "No description available."}
       </p>
 
-      {keywords.length > 0 && (
+      {matched_keywords.length > 0 && (
         <div className="mt-3 flex flex-wrap gap-1.5">
-          {keywords.slice(0, 3).map((kw) => (
+          {matched_keywords.slice(0, 3).map((kw) => (
             <span
               key={kw}
               className="text-[10px] text-slate-400 bg-slate-50 border border-slate-200 px-1.5 py-0.5 rounded"
@@ -59,11 +70,23 @@ const OpportunityCard = ({ title, summary, date, source, link, keywords = [] }) 
         </div>
       )}
 
-      <div className="mt-4 pt-3 border-t border-slate-100 flex items-center gap-1.5 text-xs text-slate-400">
-        <CalendarIcon className="w-3.5 h-3.5" />
-        {formatDate(date)}
+      <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-1.5 text-xs text-slate-400">
+          <CalendarIcon className="w-3.5 h-3.5" />
+          {formatDate(published_at)}
+        </div>
+        <a
+          href={link}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={(e) => e.stopPropagation()}
+          className="inline-flex items-center gap-1 text-xs font-semibold text-amber-600 hover:text-amber-700"
+        >
+          View on Source
+          <ArrowTopRightOnSquareIcon className="w-3.5 h-3.5" />
+        </a>
       </div>
-    </a>
+    </div>
   );
 };
 
