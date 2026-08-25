@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import OpportunityCard from "@/app/components/opportunity-card";
+import OpportunityModal from "@/app/components/opportunity-modal";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { API_URL } from "@/app/lib/api";
 
@@ -21,6 +22,7 @@ export default function OpportunitiesPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [selected, setSelected] = useState(null);
   const itemsPerPage = 9;
 
   useEffect(() => {
@@ -113,15 +115,7 @@ export default function OpportunitiesPage() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {paginatedOpportunities.map((opp) => (
-            <OpportunityCard
-              key={opp.link}
-              title={opp.title}
-              summary={opp.excerpt}
-              date={opp.published_at}
-              source={opp.source}
-              link={opp.link}
-              keywords={opp.matched_keywords}
-            />
+            <OpportunityCard key={opp.link} opportunity={opp} onOpen={setSelected} />
           ))}
         </div>
       )}
@@ -147,6 +141,8 @@ export default function OpportunitiesPage() {
           </button>
         </div>
       )}
+
+      <OpportunityModal opportunity={selected} onClose={() => setSelected(null)} />
     </div>
   );
 }
