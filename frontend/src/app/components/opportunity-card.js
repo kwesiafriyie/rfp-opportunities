@@ -1,5 +1,6 @@
 import React from "react";
-import { CalendarIcon, ClockIcon, ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
+import { CalendarIcon, ClockIcon, ArrowTopRightOnSquareIcon, MapPinIcon } from "@heroicons/react/24/outline";
+import { getCountdown, formatRelative } from "@/app/lib/deadline";
 
 export const SOURCE_STYLES = {
   "standard.gm": "bg-blue-50 text-blue-700 ring-blue-600/20",
@@ -9,6 +10,13 @@ export const SOURCE_STYLES = {
   "gambiatenders.com": "bg-amber-50 text-amber-700 ring-amber-600/20",
   "tenders.gm": "bg-cyan-50 text-cyan-700 ring-cyan-600/20",
   "gppa.gm": "bg-teal-50 text-teal-700 ring-teal-600/20",
+  "tenders.ppa.gov.gh": "bg-indigo-50 text-indigo-700 ring-indigo-600/20",
+  "tenders.com.gh": "bg-fuchsia-50 text-fuchsia-700 ring-fuchsia-600/20",
+  "UNGM": "bg-sky-50 text-sky-700 ring-sky-600/20",
+};
+
+export const SOURCE_FULL_NAMES = {
+  UNGM: "United Nations Global Marketplace",
 };
 
 export const formatDate = (iso) => {
@@ -20,13 +28,37 @@ export const formatDate = (iso) => {
   });
 };
 
+// A compact, non-alarming urgency badge: amber once <=10 days remain,
+// neutral otherwise. Deliberately reuses the same color for every urgent
+// tier (no separate "red" panic state) -- the point is to help users
+// prioritize, not alarm them.
+export function DeadlineBadge({ deadline, now, className = "" }) {
+  if (!deadline) return null;
+  const countdown = getCountdown(deadline, now);
+  if (!countdown || countdown.expired) return null;
+
+  return (
+    <span
+      title={countdown.detail}
+      className={`inline-flex items-center gap-1 text-[11px] font-semibold ${
+        countdown.urgent ? "text-amber-700" : "text-slate-400"
+      } ${className}`}
+    >
+      <ClockIcon className="w-3.5 h-3.5" />
+      {countdown.label}
+    </span>
+  );
+}
+
 // Clicking the card body opens the details modal (via onOpen); the "View on
 // Source" link is a separate element that goes straight to the external
 // site, with its own click handler stopping propagation so it doesn't also
 // trigger the modal.
-const OpportunityCard = ({ opportunity, onOpen }) => {
-  const { title, excerpt, published_at, deadline, source, link, matched_keywords = [] } = opportunity;
-  const deadlinePassed = deadline && new Date(deadline) < new Date();
+const OpportunityCard = ({ opportunity, onOpen, now }) => {
+  const {
+    title, excerpt, published_at, deadline, source, link,
+    country, opportunity_type, sector, matched_keywords = [],
+  } = opportunity;
   const sourceStyle = SOURCE_STYLES[source] || "bg-slate-100 text-slate-600 ring-slate-500/20";
 
   const handleKeyDown = (e) => {
@@ -51,19 +83,28 @@ const OpportunityCard = ({ opportunity, onOpen }) => {
         >
           {source}
         </span>
-        {deadline && (
-          <span
-            className={`inline-flex items-center gap-1 text-[11px] font-semibold ${
-              deadlinePassed ? "text-slate-400" : "text-amber-600"
-            }`}
-          >
-            <ClockIcon className="w-3.5 h-3.5" />
-            {formatDate(deadline)}
-          </span>
-        )}
+        <DeadlineBadge deadline={deadline} now={now} />
       </div>
 
       <h3 className="text-lg font-semibold text-slate-900 leading-snug line-clamp-2 mb-2">{title}</h3>
+
+      {(country || opportunity_type) && (
+        <div className="flex items-center flex-wrap gap-x-3 gap-y-1 text-xs text-slate-500 mb-2">
+          {country && (
+            <span className="inline-flex items-center gap-1">
+              <MapPinIcon className="w-3.5 h-3.5 text-slate-400" />
+              {country}
+            </span>
+          )}
+          {opportunity_type && (
+            <span>
+              {opportunity_type}
+              {sector ? ` · ${sector}` : ""}
+            </span>
+          )}
+        </div>
+      )}
+
       <p className="text-sm text-slate-500 line-clamp-3 flex-grow">
         {excerpt || "No description available."}
       </p>
@@ -82,9 +123,9 @@ const OpportunityCard = ({ opportunity, onOpen }) => {
       )}
 
       <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
-        <div className="flex items-center gap-1.5 text-xs text-slate-400">
+        <div className="flex items-center gap-1.5 text-xs text-slate-400" title={formatDate(published_at)}>
           <CalendarIcon className="w-3.5 h-3.5" />
-          {formatDate(published_at)}
+          Published {formatRelative(published_at)}
         </div>
         <a
           href={link}
