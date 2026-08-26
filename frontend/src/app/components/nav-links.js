@@ -15,7 +15,7 @@ const links = [
   { name: "Dashboard", href: "/dashboard", icon: HomeIcon },
   { name: "Opportunities", href: "/dashboard/opportunities", icon: DocumentTextIcon },
   { name: "Analytics", href: "/dashboard/analysis", icon: ChartBarIcon },
-  { name: "Notifications", href: "/dashboard/subscribers", icon: EnvelopeIcon },
+  { name: "Get Alerts", href: "/dashboard/subscribers", icon: EnvelopeIcon },
 ];
 
 export default function NavLinks() {

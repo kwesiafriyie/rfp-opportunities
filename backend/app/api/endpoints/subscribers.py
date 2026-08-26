@@ -11,6 +11,7 @@ from ...core.database import get_db
 from ...models.opportunity import Opportunity
 from ...models.subscriber import Subscriber
 from ...services.email_service import send_digest
+from ..deps import require_admin
 
 router = APIRouter()
 
@@ -19,7 +20,7 @@ class SubscriberCreate(BaseModel):
     email: EmailStr
 
 
-@router.get("/", response_model=list)
+@router.get("/", response_model=list, dependencies=[Depends(require_admin)])
 async def list_subscribers(db: Session = Depends(get_db)):
     subscribers = db.query(Subscriber).order_by(Subscriber.created_at.desc()).all()
     return [s.to_dict() for s in subscribers]
@@ -38,7 +39,7 @@ async def add_subscriber(payload: SubscriberCreate, db: Session = Depends(get_db
     return subscriber.to_dict()
 
 
-@router.post("/test-email", response_model=dict)
+@router.post("/test-email", response_model=dict, dependencies=[Depends(require_admin)])
 async def send_test_email(db: Session = Depends(get_db)):
     """Sends a one-off sample digest to every current subscriber, using the
     exact same send_digest() path the real scraper uses -- lets you verify
@@ -86,7 +87,7 @@ async def unsubscribe(email: str, db: Session = Depends(get_db)):
     """
 
 
-@router.delete("/{subscriber_id}", status_code=204)
+@router.delete("/{subscriber_id}", status_code=204, dependencies=[Depends(require_admin)])
 async def remove_subscriber(subscriber_id: int, db: Session = Depends(get_db)):
     subscriber = db.query(Subscriber).filter(Subscriber.id == subscriber_id).first()
     if not subscriber:

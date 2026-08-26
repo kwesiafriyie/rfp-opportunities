@@ -1,8 +1,16 @@
 """Keyword filter that decides whether a post is a consulting opportunity.
 
-Scoped deliberately narrow (per product decision): individual/firm consultancy
-notices only -- not general goods/works tenders that happen to share a category
-with them.
+Scoped deliberately narrow (per product decision): individual/firm
+consultancy and IT/digital-services notices -- not general goods/works
+tenders that happen to share a category with them. The IT/digital-services
+phrases (website hosting, software development, ...) were added after a
+real UNGM notice ("Provision of services for WMO Website Hosting,
+Maintenance, Security and Hosting and Development") showed the original
+consultancy/advisory-only wording missed genuine digital-services work that
+doesn't use consulting language. Added as specific multi-word phrases, not
+bare words like "security"/"maintenance"/"development" -- those alone are
+far too generic and would also match physical guard/building-maintenance
+or unrelated "economic development" tenders.
 """
 import re
 from typing import List
@@ -39,6 +47,16 @@ _PHRASES = [
     "data management",
     "cybersecurity",
     "cyber security",
+    "website hosting",
+    "web hosting",
+    "website development",
+    "website design",
+    "website maintenance",
+    "software development",
+    "systems development",
+    "application development",
+    "ict services",
+    "network infrastructure",
 ]
 
 # Short tokens need word-boundary matching, otherwise "eoi"/"rfp" style

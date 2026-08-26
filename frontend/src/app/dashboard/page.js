@@ -26,6 +26,7 @@ const SOURCES = [
   "tenders.ppa.gov.gh",
   "tenders.com.gh",
   "UNGM",
+  "AfDB",
 ];
 
 function SourceBadge({ source }) {

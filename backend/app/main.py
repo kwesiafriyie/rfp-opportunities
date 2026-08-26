@@ -4,7 +4,7 @@ import threading
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from .api.endpoints import opportunities, subscribers
+from .api.endpoints import admin_auth, admin_opportunities, opportunities, subscribers
 from .core.config import settings
 from .core.database import Base, SessionLocal, engine, sync_schema
 from .scheduler import start_scheduler
@@ -40,6 +40,16 @@ app.include_router(
     subscribers.router,
     prefix="/api/subscribers",
     tags=["subscribers"],
+)
+app.include_router(
+    admin_auth.router,
+    prefix="/api/admin",
+    tags=["admin"],
+)
+app.include_router(
+    admin_opportunities.router,
+    prefix="/api/admin",
+    tags=["admin"],
 )
 
 

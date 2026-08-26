@@ -9,3 +9,4 @@ beautifulsoup4==4.12.2
 apscheduler==3.10.4
 python-dateutil==2.8.2
 email-validator==2.1.0.post1
+itsdangerous==2.1.2

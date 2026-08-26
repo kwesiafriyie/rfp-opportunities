@@ -39,6 +39,18 @@ class Settings(BaseSettings):
     # blank to omit the link (falls back to a plain-text explanation).
     BACKEND_PUBLIC_URL: str = ""
 
+    # Admin area (manual opportunity intake/edit, subscriber management).
+    # A single shared passphrase, not per-user accounts -- this is a
+    # single-operator tool, not a multi-admin system. Leave unset to
+    # disable the admin area entirely (every admin route then always
+    # rejects, rather than accepting a blank password).
+    ADMIN_PASSWORD: str = ""
+    # Signs admin session tokens. If left unset, a random key is generated
+    # at process startup (see security.py) -- fine for a single instance,
+    # but every admin is logged out on every restart/redeploy since old
+    # tokens no longer verify. Set this in production to avoid that.
+    SECRET_KEY: str = ""
+
     @property
     def EMAIL_ENABLED(self) -> bool:
         return bool(self.SENDGRID_API_KEY and self.FROM_EMAIL)

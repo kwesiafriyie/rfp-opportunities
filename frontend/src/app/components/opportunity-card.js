@@ -1,5 +1,11 @@
 import React from "react";
-import { CalendarIcon, ClockIcon, ArrowTopRightOnSquareIcon, MapPinIcon } from "@heroicons/react/24/outline";
+import {
+  CalendarIcon,
+  ClockIcon,
+  ArrowTopRightOnSquareIcon,
+  MapPinIcon,
+  ChevronRightIcon,
+} from "@heroicons/react/24/outline";
 import { getCountdown, formatRelative } from "@/app/lib/deadline";
 
 export const SOURCE_STYLES = {
@@ -13,10 +19,12 @@ export const SOURCE_STYLES = {
   "tenders.ppa.gov.gh": "bg-indigo-50 text-indigo-700 ring-indigo-600/20",
   "tenders.com.gh": "bg-fuchsia-50 text-fuchsia-700 ring-fuchsia-600/20",
   "UNGM": "bg-sky-50 text-sky-700 ring-sky-600/20",
+  "AfDB": "bg-lime-50 text-lime-700 ring-lime-600/20",
 };
 
 export const SOURCE_FULL_NAMES = {
   UNGM: "United Nations Global Marketplace",
+  AfDB: "African Development Bank",
 };
 
 export const formatDate = (iso) => {
@@ -57,7 +65,7 @@ export function DeadlineBadge({ deadline, now, className = "" }) {
 const OpportunityCard = ({ opportunity, onOpen, now }) => {
   const {
     title, excerpt, published_at, deadline, source, link,
-    country, opportunity_type, sector, matched_keywords = [],
+    organization, country, opportunity_type, sector, matched_keywords = [],
   } = opportunity;
   const sourceStyle = SOURCE_STYLES[source] || "bg-slate-100 text-slate-600 ring-slate-500/20";
 
@@ -86,7 +94,11 @@ const OpportunityCard = ({ opportunity, onOpen, now }) => {
         <DeadlineBadge deadline={deadline} now={now} />
       </div>
 
-      <h3 className="text-lg font-semibold text-slate-900 leading-snug line-clamp-2 mb-2">{title}</h3>
+      <h3 className="text-lg font-semibold text-slate-900 leading-snug line-clamp-2 mb-1.5">{title}</h3>
+
+      {organization && (
+        <p className="text-xs font-medium text-slate-500 truncate mb-2">{organization}</p>
+      )}
 
       {(country || opportunity_type) && (
         <div className="flex items-center flex-wrap gap-x-3 gap-y-1 text-xs text-slate-500 mb-2">
@@ -108,6 +120,11 @@ const OpportunityCard = ({ opportunity, onOpen, now }) => {
       <p className="text-sm text-slate-500 line-clamp-3 flex-grow">
         {excerpt || "No description available."}
       </p>
+
+      <div className="mt-3 inline-flex items-center gap-0.5 text-xs font-semibold text-amber-600 group-hover:text-amber-700">
+        View Details
+        <ChevronRightIcon className="w-3.5 h-3.5" />
+      </div>
 
       {matched_keywords.length > 0 && (
         <div className="mt-3 flex flex-wrap gap-1.5">
