@@ -27,6 +27,7 @@ const SOURCE_COLORS = {
   "tenders.ppa.gov.gh": "#4f46e5",
   "tenders.com.gh": "#c026d3",
   "UNGM": "#0284c7",
+  "AfDB": "#65a30d",
 };
 
 const CHART_OPTIONS = {

@@ -26,6 +26,7 @@ class Opportunity(Base):
     contact_info = Column(Text, nullable=True)  # free-text contact block (email/name lines), where a source exposes one
     documents = Column(Text, nullable=True)  # JSON list of {"label", "url"} -- links out to the source's own documents, never downloaded/hosted here
     extra = Column(Text, nullable=True)  # JSON list of {"label", "value"} for source-specific fields that don't warrant their own column (UNSPSC category, and future per-source fields like AfDB's funding source/implementing agency)
+    ingestion_method = Column(String, nullable=True, default="automated")  # "automated" | "manual" -- set once at creation, never changed by later edits. NULL on rows that predate this column; treated as "automated" everywhere it's read, since every row before manual intake existed was scraped.
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     def to_dict(self):
@@ -48,5 +49,6 @@ class Opportunity(Base):
             "contact_info": self.contact_info,
             "documents": json.loads(self.documents) if self.documents else [],
             "extra": json.loads(self.extra) if self.extra else [],
+            "ingestion_method": self.ingestion_method or "automated",
             "created_at": self.created_at.isoformat() if self.created_at else None,
         }

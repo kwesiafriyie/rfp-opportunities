@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Cog6ToothIcon } from "@heroicons/react/24/outline";
 import NavLinks from "./nav-links";
 
 export default function SideNav() {
@@ -20,7 +21,15 @@ export default function SideNav() {
         <NavLinks />
       </div>
 
-      <p className="hidden px-2 text-xs text-slate-500 md:block">
+      <Link
+        href="/dashboard/admin"
+        className="flex h-[40px] items-center gap-3 rounded-lg px-3 text-sm font-medium text-slate-500 transition-colors hover:bg-slate-800 hover:text-white"
+      >
+        <Cog6ToothIcon className="w-4 h-4 flex-none" />
+        <p className="hidden md:block">Admin</p>
+      </Link>
+
+      <p className="hidden px-2 text-xs text-slate-500 md:block mt-3">
         Tracking standard.gm, thepoint.gm &amp; foroyaa.net
       </p>
     </div>

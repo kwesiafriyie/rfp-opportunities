@@ -134,7 +134,7 @@ def run_all(db: Session) -> Tuple[Dict[str, int], List[Opportunity]]:
                     setattr(existing, field, value)
                 continue
 
-            opportunity = Opportunity(source=source.name, link=link, **fields)
+            opportunity = Opportunity(source=source.name, link=link, ingestion_method="automated", **fields)
             db.add(opportunity)
             added += 1
             new_opportunities.append(opportunity)

@@ -19,10 +19,12 @@ export const SOURCE_STYLES = {
   "tenders.ppa.gov.gh": "bg-indigo-50 text-indigo-700 ring-indigo-600/20",
   "tenders.com.gh": "bg-fuchsia-50 text-fuchsia-700 ring-fuchsia-600/20",
   "UNGM": "bg-sky-50 text-sky-700 ring-sky-600/20",
+  "AfDB": "bg-lime-50 text-lime-700 ring-lime-600/20",
 };
 
 export const SOURCE_FULL_NAMES = {
   UNGM: "United Nations Global Marketplace",
+  AfDB: "African Development Bank",
 };
 
 export const formatDate = (iso) => {
