@@ -42,6 +42,12 @@ Each site is scraped one of three ways:
   /tenders (RFP) listing pages and merges them under this one source,
   since they're the same portal with identical markup.
 
+- "tenderscomgh_html": bespoke scraper for TENDERS.com.gh (see
+  app/scrapers/tenderscomgh_scraper.py). Server-rendered HTML with real
+  pagination. Each listing carries a procurement-type badge (EOI, RFP,
+  Invitation for Tenders, ...) that's folded into the excerpt so the
+  keyword filter can use it as signal.
+
 Either way, every post that comes back still has to pass the consulting
 keyword filter (app/core/keywords.py) before it's stored.
 """
@@ -53,7 +59,7 @@ from typing import Optional
 class Source:
     name: str
     base_url: str
-    scraper: str = "wp_rest"  # "wp_rest", "rss", "thepoint_html", "gambiatenders_html", "tendersgm_html", "gppa_api", or "ppa_html"
+    scraper: str = "wp_rest"  # "wp_rest", "rss", "thepoint_html", "gambiatenders_html", "tendersgm_html", "gppa_api", "ppa_html", or "tenderscomgh_html"
     category_slug: Optional[str] = None  # wp_rest only
     feed_path: Optional[str] = None  # rss only
     per_page: int = 20  # wp_rest only -- lower for sites whose server chokes on larger pages
@@ -92,4 +98,6 @@ SOURCES = [
     Source(name="gppa.gm", base_url="https://gppa.gm", scraper="gppa_api"),
 
     Source(name="tenders.ppa.gov.gh", base_url="https://tenders.ppa.gov.gh", scraper="ppa_html"),
+
+    Source(name="tenders.com.gh", base_url="https://tenders.com.gh", scraper="tenderscomgh_html"),
 ]

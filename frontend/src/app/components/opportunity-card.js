@@ -10,6 +10,7 @@ export const SOURCE_STYLES = {
   "tenders.gm": "bg-cyan-50 text-cyan-700 ring-cyan-600/20",
   "gppa.gm": "bg-teal-50 text-teal-700 ring-teal-600/20",
   "tenders.ppa.gov.gh": "bg-indigo-50 text-indigo-700 ring-indigo-600/20",
+  "tenders.com.gh": "bg-fuchsia-50 text-fuchsia-700 ring-fuchsia-600/20",
 };
 
 export const formatDate = (iso) => {

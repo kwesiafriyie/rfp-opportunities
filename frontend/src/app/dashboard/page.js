@@ -22,6 +22,7 @@ const SOURCES = [
   "tenders.gm",
   "gppa.gm",
   "tenders.ppa.gov.gh",
+  "tenders.com.gh",
 ];
 
 function SourceBadge({ source }) {

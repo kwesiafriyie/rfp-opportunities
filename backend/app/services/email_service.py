@@ -31,6 +31,7 @@ SOURCE_COLORS = {
     "tenders.gm": ("#ecfeff", "#0891b2"),
     "gppa.gm": ("#f0fdfa", "#0d9488"),
     "tenders.ppa.gov.gh": ("#eef2ff", "#4338ca"),
+    "tenders.com.gh": ("#fdf4ff", "#a21caf"),
 }
 DEFAULT_SOURCE_COLOR = ("#f1f5f9", "#475569")
 
