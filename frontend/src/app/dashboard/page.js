@@ -10,8 +10,10 @@ import {
   ArrowTopRightOnSquareIcon,
 } from "@heroicons/react/24/outline";
 import { API_URL } from "@/app/lib/api";
-import { SOURCE_STYLES, formatDate } from "@/app/components/opportunity-card";
+import { SOURCE_STYLES, DeadlineBadge } from "@/app/components/opportunity-card";
+import { formatRelative } from "@/app/lib/deadline";
 import OpportunityModal from "@/app/components/opportunity-modal";
+import useNowTick from "@/app/lib/useNowTick";
 
 const SOURCES = [
   "standard.gm",
@@ -23,6 +25,7 @@ const SOURCES = [
   "gppa.gm",
   "tenders.ppa.gov.gh",
   "tenders.com.gh",
+  "UNGM",
 ];
 
 function SourceBadge({ source }) {
@@ -54,6 +57,7 @@ function StatTile({ icon: Icon, label, value, accent }) {
 }
 
 export default function DashboardHome() {
+  const now = useNowTick();
   const [opportunities, setOpportunities] = useState([]);
   const [subscriberCount, setSubscriberCount] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -90,17 +94,24 @@ export default function DashboardHome() {
     );
   }
 
+  // Belt-and-suspenders on top of the backend's own open-only filtering:
+  // keeps this list correct live as the shared clock ticks past a deadline
+  // while the page stays open, without waiting for a refetch.
+  const openOpportunities = opportunities.filter(
+    (o) => !o.deadline || new Date(o.deadline).getTime() > now
+  );
+
   const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-  const newThisWeek = opportunities.filter(
+  const newThisWeek = openOpportunities.filter(
     (o) => o.created_at && new Date(o.created_at) >= sevenDaysAgo
   ).length;
 
   const sourceCounts = SOURCES.reduce((acc, s) => {
-    acc[s] = opportunities.filter((o) => o.source === s).length;
+    acc[s] = openOpportunities.filter((o) => o.source === s).length;
     return acc;
   }, {});
 
-  const recent = opportunities.slice(0, 5);
+  const recent = openOpportunities.slice(0, 5);
 
   return (
     <div className="p-6 md:p-10 max-w-6xl mx-auto">
@@ -112,7 +123,7 @@ export default function DashboardHome() {
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
-        <StatTile icon={DocumentTextIcon} label="Total Opportunities" value={opportunities.length} />
+        <StatTile icon={DocumentTextIcon} label="Open Opportunities" value={openOpportunities.length} />
         <StatTile icon={GlobeAltIcon} label="Sources Monitored" value={SOURCES.length} />
         <StatTile icon={ClockIcon} label="New This Week" value={newThisWeek} accent />
         <StatTile icon={EnvelopeIcon} label="Subscribers" value={subscriberCount} />
@@ -154,17 +165,8 @@ export default function DashboardHome() {
                       <p className="text-sm font-medium text-slate-800 line-clamp-1">{o.title}</p>
                       <div className="mt-1.5 flex items-center gap-2">
                         <SourceBadge source={o.source} />
-                        <span className="text-xs text-slate-400">{formatDate(o.published_at)}</span>
-                        {o.deadline && (
-                          <span
-                            className={`inline-flex items-center gap-1 text-xs font-semibold ${
-                              new Date(o.deadline) < new Date() ? "text-slate-400" : "text-amber-600"
-                            }`}
-                          >
-                            <ClockIcon className="w-3.5 h-3.5" />
-                            {formatDate(o.deadline)}
-                          </span>
-                        )}
+                        <span className="text-xs text-slate-400">{formatRelative(o.published_at)}</span>
+                        <DeadlineBadge deadline={o.deadline} now={now} className="text-xs" />
                       </div>
                     </div>
                     <a

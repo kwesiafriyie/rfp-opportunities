@@ -1,12 +1,15 @@
 "use client";
 import React, { useEffect } from "react";
-import { XMarkIcon, CalendarIcon, ClockIcon, ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
-import { SOURCE_STYLES, formatDate } from "./opportunity-card";
+import { XMarkIcon, CalendarIcon, ClockIcon, ArrowTopRightOnSquareIcon, MapPinIcon } from "@heroicons/react/24/outline";
+import { SOURCE_STYLES, SOURCE_FULL_NAMES, formatDate } from "./opportunity-card";
+import { getCountdown } from "@/app/lib/deadline";
+import useNowTick from "@/app/lib/useNowTick";
 
 // Single shared modal, rendered once at the page level and driven by
 // `opportunity` (null = closed). Closes on Escape, backdrop click, or the
 // close button; locks background scroll while open.
 export default function OpportunityModal({ opportunity, onClose }) {
+  const now = useNowTick();
   useEffect(() => {
     if (!opportunity) return;
 
@@ -24,8 +27,14 @@ export default function OpportunityModal({ opportunity, onClose }) {
 
   if (!opportunity) return null;
 
-  const { title, excerpt, published_at, deadline, source, link, matched_keywords = [] } = opportunity;
+  const {
+    title, excerpt, published_at, deadline, source, link,
+    country, organization, reference, opportunity_type, sector,
+    matched_keywords = [],
+  } = opportunity;
   const sourceStyle = SOURCE_STYLES[source] || "bg-slate-100 text-slate-600 ring-slate-500/20";
+  const sourceFullName = SOURCE_FULL_NAMES[source];
+  const countdown = getCountdown(deadline, now);
 
   return (
     <div
@@ -40,10 +49,14 @@ export default function OpportunityModal({ opportunity, onClose }) {
         <div className="flex items-start justify-between gap-4 px-6 py-5 border-b border-slate-100">
           <div className="min-w-0">
             <span
+              title={sourceFullName}
               className={`inline-block text-[11px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full ring-1 ring-inset ${sourceStyle}`}
             >
               {source}
             </span>
+            {organization && (
+              <span className="ml-2 text-xs text-slate-400">{organization}</span>
+            )}
             <h2 id="opportunity-modal-title" className="mt-2 text-lg font-semibold text-slate-900 leading-snug">
               {title}
             </h2>
@@ -58,22 +71,40 @@ export default function OpportunityModal({ opportunity, onClose }) {
         </div>
 
         <div className="px-6 py-5 overflow-y-auto">
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-sm text-slate-500 mb-4">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-sm text-slate-500 mb-2">
             <span className="flex items-center gap-1.5">
               <CalendarIcon className="w-4 h-4" />
-              {formatDate(published_at)}
+              Published {formatDate(published_at)}
             </span>
-            {deadline && (
-              <span
-                className={`flex items-center gap-1.5 font-medium ${
-                  new Date(deadline) < new Date() ? "text-slate-400" : "text-amber-600"
-                }`}
-              >
-                <ClockIcon className="w-4 h-4" />
-                Deadline: {formatDate(deadline)}
+            {country && (
+              <span className="flex items-center gap-1.5">
+                <MapPinIcon className="w-4 h-4" />
+                {country}
               </span>
             )}
           </div>
+
+          {deadline && countdown && !countdown.expired && (
+            <div
+              className={`flex items-center gap-2 mb-4 px-3 py-2 rounded-lg text-sm font-medium ${
+                countdown.urgent ? "bg-amber-50 text-amber-700" : "bg-slate-50 text-slate-500"
+              }`}
+            >
+              <ClockIcon className="w-4 h-4 flex-none" />
+              <span>
+                Deadline: {formatDate(deadline)} &middot; <strong>{countdown.label}</strong>
+                <span className="opacity-75"> ({countdown.detail})</span>
+              </span>
+            </div>
+          )}
+
+          {(opportunity_type || sector || reference) && (
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500 mb-4">
+              {opportunity_type && <span>{opportunity_type}</span>}
+              {sector && <span>&middot; {sector}</span>}
+              {reference && <span className="font-mono">Ref: {reference}</span>}
+            </div>
+          )}
 
           <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-line">
             {excerpt || "No description available."}

@@ -26,6 +26,7 @@ const SOURCE_COLORS = {
   "gppa.gm": "#0d9488",
   "tenders.ppa.gov.gh": "#4f46e5",
   "tenders.com.gh": "#c026d3",
+  "UNGM": "#0284c7",
 };
 
 const CHART_OPTIONS = {
