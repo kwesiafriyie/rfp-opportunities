@@ -62,7 +62,10 @@ def classify_opportunity_type(*texts: Optional[str]) -> str:
 _SECTOR_RULES = [
     ("Technology", ("digital transformation", "software", "ict", "information technology",
                      "cybersecurity", "cyber security", "data governance", "data protection",
-                     "database", "erp", "core banking", "payment system", "it system")),
+                     "database", "erp", "core banking", "payment system", "it system",
+                     "website hosting", "web hosting", "website development", "website design",
+                     "website maintenance", "software development", "systems development",
+                     "application development", "ict services", "network infrastructure")),
     ("Finance & Audit", ("audit", "financial management", "accounting", "actuarial",
                           "financial statements", "internal control")),
     ("Legal", ("legal advisory", "legal services", "legal counsel", "attorney", "law firm")),

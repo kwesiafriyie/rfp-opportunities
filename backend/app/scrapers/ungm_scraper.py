@@ -8,13 +8,15 @@ page's own request. The endpoint returns server-rendered HTML row fragments
 (not JSON data), so this still parses HTML, just from a POST response
 instead of a GET page.
 
-Filtered at the source to just the consulting-relevant notice types
-(mirroring the same "use the platform's own procurement-instrument
-categories" approach already used for Ghana PPA and AfDB) rather than
-pulling every UNGM notice type and relying entirely on the keyword filter --
-UNGM's own type taxonomy is more precise than we could get from keywords
-alone, since it also covers goods/works types (Invitation to Bid, Request
-for Quotation, ...) we deliberately don't want.
+Filtered at the source to notice types that are genuine open opportunities
+to bid on (excludes things like contract award notices, which UNGM's search
+also returns but which aren't opportunities at all). Within that, relies on
+the shared keyword filter -- same as every other source -- to separate
+consulting/IT-services-relevant notices from unrelated goods/works ones,
+rather than trying to use UNGM's own instrument-type field as that signal.
+It isn't a reliable one: a real IT/digital-services notice was found filed
+under a goods/works-flavored type (see NOTICE_TYPES below), so type alone
+can't distinguish "consulting-relevant" the way it first appeared to.
 
 Not scoped to any particular UN agency -- this pulls consulting-relevant
 notices across the whole UN system (UNDP, FAO, UNICEF, WFP, AfDB, etc.),
@@ -49,10 +51,26 @@ MAX_PAGES = 10
 # metadata-only excerpt built in _parse_row rather than failing the scrape.
 MAX_DETAIL_FETCHES = 150
 
-# The consulting-relevant procurement instruments among UNGM's notice types
-# (excludes goods/works-flavored ones like Invitation to Bid, Request for
-# Quotation, Request for Pre-Qualification).
-NOTICE_TYPES = ["RequestForEoi", "RequestForProposal", "IndividualConsultant"]
+# UNGM's notice-type field turned out not to reliably separate "consulting"
+# from "goods/works" -- a real notice ("Provision of services for WMO
+# Website Hosting, Maintenance, Security and Hosting and Development") was
+# missing under the original three-type allowlist, most likely because it's
+# filed as a Request for Quotation or Invitation to Bid rather than an
+# EOI/RFP, even though it's genuine IT/digital-services work. Widened to
+# include those two instrument types as well; the (source-agnostic) keyword
+# filter in pipeline.py is what actually keeps out pure goods/works noise
+# within them now, the same way it already does for every other source --
+# not left unfiltered here, but no longer treating instrument type as a
+# stand-in for consulting-relevance. Still excludes types that are never
+# actual open opportunities to bid on regardless of subject matter (contract
+# award notices, pre-qualification results, etc.).
+#
+# This does mean more candidate rows per scrape (RFQ/ITB are the most common
+# instrument types platform-wide, well beyond IT/consulting work), so
+# MAX_PAGES/MAX_DETAIL_FETCHES below may need raising if real-world coverage
+# turns out to be pagination-starved by the added volume -- not pre-tuned
+# without evidence that's actually happening.
+NOTICE_TYPES = ["RequestForEoi", "RequestForProposal", "IndividualConsultant", "RequestForQuotation", "InvitationToBid"]
 
 _OFFSET_PART_RE = re.compile(r"\(GMT[^)]*\)", re.IGNORECASE)
 
