@@ -1,3 +1,4 @@
+import json
 import logging
 from datetime import datetime, timezone
 from typing import Dict, List, Tuple
@@ -5,7 +6,7 @@ from typing import Dict, List, Tuple
 from sqlalchemy.orm import Session
 
 from ..core.keywords import find_matched_keywords
-from ..core.normalize import classify_opportunity_type, classify_sector
+from ..core.normalize import classify_opportunity_type, classify_sector, summarize
 from ..core.sources import SOURCES, Source
 from ..models.opportunity import Opportunity
 from .gambiatenders_scraper import fetch_posts as fetch_gambiatenders_posts
@@ -45,12 +46,23 @@ def _build_fields(post: Dict, keywords: List[str]) -> Dict:
     """Normalize a raw scraped post dict into the Opportunity model's
     mutable fields. Shared by both the insert and update paths so a
     re-scraped row is normalized identically to a freshly inserted one.
+
+    `excerpt` (short, card-level) is derived from `description` (full,
+    detail-view-level) whenever a source provides one -- a source that
+    doesn't (most of the existing HTML/RSS scrapers) just keeps whatever
+    short text it already produces as `excerpt`, so this is additive, not a
+    behavior change for them.
     """
     title = post.get("title")
-    excerpt = post.get("excerpt")
+    description = post.get("description")
+    excerpt = summarize(description) if description else post.get("excerpt")
+    classification_text = description or post.get("excerpt")
+    documents = post.get("documents")
+    extra = post.get("extra")
     return {
         "title": title,
         "excerpt": excerpt,
+        "description": description,
         "published_at": post.get("published_at"),
         "deadline": post.get("deadline"),
         "deadline_raw": post.get("deadline_raw"),
@@ -58,8 +70,12 @@ def _build_fields(post: Dict, keywords: List[str]) -> Dict:
         "organization": post.get("organization"),
         "country": post.get("country"),
         "reference": post.get("reference"),
-        "opportunity_type": classify_opportunity_type(post.get("opportunity_type"), title, excerpt),
-        "sector": classify_sector(title, excerpt),
+        "opportunity_type": classify_opportunity_type(post.get("opportunity_type"), title, classification_text),
+        "sector": classify_sector(title, classification_text),
+        "eligibility": post.get("eligibility"),
+        "contact_info": post.get("contact_info"),
+        "documents": json.dumps(documents) if documents else None,
+        "extra": json.dumps(extra) if extra else None,
     }
 
 
@@ -105,7 +121,8 @@ def run_all(db: Session) -> Tuple[Dict[str, int], List[Opportunity]]:
             if deadline is not None and deadline <= now:
                 continue  # already expired -- never store it in the first place
 
-            keywords = find_matched_keywords(f"{title} {post.get('excerpt', '')}")
+            search_text = post.get("description") or post.get("excerpt") or ""
+            keywords = find_matched_keywords(f"{title} {search_text}")
             if not keywords:
                 continue
 

@@ -32,6 +32,18 @@ _TYPE_RULES = [
 ]
 
 
+def _contains_marker(haystack: str, marker: str) -> bool:
+    """Plain substring match for genuine phrases; word-boundary match for
+    short/acronym-style markers (<=4 chars once stripped) so they can't
+    false-positive inside an unrelated longer word -- e.g. the marker "ict"
+    matching inside "district", or "ami " inside "tsunami ".
+    """
+    stripped = marker.strip()
+    if len(stripped) <= 4:
+        return re.search(rf"\b{re.escape(stripped)}\b", haystack) is not None
+    return marker in haystack
+
+
 def classify_opportunity_type(*texts: Optional[str]) -> str:
     """Best-effort normalized type from any free text describing the
     procurement instrument (a source's own type label, title, excerpt).
@@ -40,7 +52,7 @@ def classify_opportunity_type(*texts: Optional[str]) -> str:
     """
     haystack = " ".join(t for t in texts if t).lower()
     for label, markers in _TYPE_RULES:
-        if any(m in haystack for m in markers):
+        if any(_contains_marker(haystack, m) for m in markers):
             return label
     return "Consultancy"
 
@@ -76,9 +88,28 @@ def classify_sector(*texts: Optional[str]) -> Optional[str]:
     """
     haystack = " ".join(t for t in texts if t).lower()
     for label, markers in _SECTOR_RULES:
-        if any(m in haystack for m in markers):
+        if any(_contains_marker(haystack, m) for m in markers):
             return label
     return None
+
+
+def summarize(text: Optional[str], max_chars: int = 200) -> Optional[str]:
+    """Card-level summary derived from a full description: collapses all
+    whitespace/paragraph breaks to single spaces (the card is a one-paragraph
+    scan, unlike the full description which keeps its structure for the
+    detail view) and truncates at a word boundary. 200 chars comfortably
+    fills the card excerpt's existing 3-line clamp without regularly
+    overflowing it mid-sentence.
+    """
+    if not text:
+        return None
+    collapsed = re.sub(r"\s+", " ", text).strip()
+    if not collapsed:
+        return None
+    if len(collapsed) <= max_chars:
+        return collapsed
+    truncated = collapsed[:max_chars].rsplit(" ", 1)[0].rstrip(".,;:- ")
+    return (truncated or collapsed[:max_chars]) + "…"
 
 
 _OFFSET_RE = re.compile(r"GMT\s*([+-])\s*(\d{1,2})[:.]?(\d{2})?", re.IGNORECASE)

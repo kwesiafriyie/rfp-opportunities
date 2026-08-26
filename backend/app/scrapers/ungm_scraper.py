@@ -37,8 +37,17 @@ USER_AGENT = "Mozilla/5.0 (compatible; ConsultingOpportunitiesBot/1.0; +https://
 REQUEST_TIMEOUT = 20
 SEARCH_PATH = "/Public/Notice/Search"
 NOTICE_PATH = "/Public/Notice"
+POPUP_PATH = "/Public/Notice/Popup"
 PAGE_SIZE = 50
 MAX_PAGES = 10
+
+# The search listing has no description field at all -- only the detail
+# "popup" endpoint (the same partial UNGM's own site fetches via AJAX for its
+# in-page preview) has it, along with documents/links, contacts, and
+# eligibility-flavored fields. That's one extra request per notice, so cap
+# how many we do per scrape; anything beyond the cap just keeps the
+# metadata-only excerpt built in _parse_row rather than failing the scrape.
+MAX_DETAIL_FETCHES = 150
 
 # The consulting-relevant procurement instruments among UNGM's notice types
 # (excludes goods/works-flavored ones like Invitation to Bid, Request for
@@ -125,6 +134,122 @@ def _parse_row(row, base_url: str) -> Optional[Dict]:
     }
 
 
+def _html_to_text(html: str) -> Optional[str]:
+    """Convert a UNGM description fragment's nested div/br markup into plain
+    text with paragraph breaks preserved -- never raw HTML, so the frontend
+    can keep rendering it as plain text (whitespace-pre-line) rather than
+    needing dangerouslySetInnerHTML.
+    """
+    if not html:
+        return None
+    soup = BeautifulSoup(html, "html.parser")
+    for br in soup.find_all("br"):
+        br.replace_with("\n")
+    for block in soup.find_all(["div", "p", "li", "tr"]):
+        block.append("\n")
+    text = soup.get_text()
+    text = re.sub(r"[ \t]+", " ", text)
+    text = re.sub(r"\n{3,}", "\n\n", text)
+    text = text.strip()
+    return text or None
+
+
+def _extract_description(soup: BeautifulSoup) -> Optional[str]:
+    for item in soup.select(".ungm-list-item.ungm-background"):
+        title_el = item.select_one(".title")
+        if title_el and title_el.get_text(strip=True).lower() == "description":
+            children = item.find_all("div", recursive=False)
+            if len(children) >= 2:
+                return _html_to_text(str(children[1]))
+    return None
+
+
+def _extract_labeled_row(soup: BeautifulSoup, label_text: str) -> Optional[str]:
+    for row in soup.select(".row"):
+        label_el = row.select_one(".label")
+        if label_el and label_text.lower() in label_el.get_text(strip=True).lower():
+            value_el = row.select_one(".value")
+            return value_el.get_text(strip=True) if value_el else None
+    return None
+
+
+def _extract_contact_info(soup: BeautifulSoup) -> Optional[str]:
+    lines = []
+    seen_values = set()
+    for row in soup.select("#contactDetails .row"):
+        label_el = row.select_one(".label")
+        value_el = row.select_one(".value")
+        if not label_el or not value_el:
+            continue
+        label = label_el.get_text(strip=True).rstrip(":")
+        value = value_el.get_text(strip=True)
+        if not value or value in seen_values:
+            continue
+        seen_values.add(value)
+        lines.append(f"{label}: {value}")
+    return "\n".join(lines) if lines else None
+
+
+def _extract_documents(soup: BeautifulSoup) -> List[Dict]:
+    """UNGM's "Links" tab -- always links out to the source (UNDP's own
+    procurement system, sharepoint, etc.), never a file hosted by UNGM
+    itself. We surface these the same way: link out, never fetch/host them.
+    """
+    docs = []
+    for row in soup.select("#tblLinks tbody tr"):
+        cells = row.select("td")
+        if len(cells) < 2:
+            continue
+        url = cells[0].get_text(strip=True)
+        label = cells[1].get_text(strip=True) or url
+        if url:
+            docs.append({"label": label, "url": url})
+    return docs
+
+
+def _extract_unspsc_category(soup: BeautifulSoup) -> Optional[str]:
+    """Best-effort: UNGM renders the *entire* UNSPSC tree for context, with
+    only the notice's actual category chain marked "expanded" (siblings and
+    unrelated branches aren't). The deepest node in that chain -- the last
+    ".expanded" match in document order -- is the notice's specific category.
+    """
+    nodes = soup.select(".unspscNode > .nodeName.expanded")
+    if not nodes:
+        return None
+    parts = [
+        s.get_text(strip=True) for s in nodes[-1].select(".floatLeft")
+        if s.get_text(strip=True) and s.get_text(strip=True) != "-"
+    ]
+    return " - ".join(parts) if parts else None
+
+
+def _fetch_detail(notice_id: str, base_url: str) -> Dict:
+    url = f"{base_url}{POPUP_PATH}/{notice_id}"
+    headers = {
+        "User-Agent": USER_AGENT,
+        "X-Requested-With": "XMLHttpRequest",
+        "Referer": f"{base_url}{NOTICE_PATH}",
+    }
+    try:
+        resp = requests.get(url, headers=headers, timeout=REQUEST_TIMEOUT)
+        resp.raise_for_status()
+    except requests.RequestException as e:
+        logger.warning(f"Failed to fetch UNGM notice detail {notice_id}: {e}")
+        return {}
+
+    soup = BeautifulSoup(resp.text, "html.parser")
+    registration_level = _extract_labeled_row(soup, "Registration level")
+    unspsc_category = _extract_unspsc_category(soup)
+
+    return {
+        "description": _extract_description(soup),
+        "documents": _extract_documents(soup),
+        "contact_info": _extract_contact_info(soup),
+        "eligibility": f"Registration level: {registration_level}" if registration_level else None,
+        "extra": [{"label": "UNSPSC Category", "value": unspsc_category}] if unspsc_category else None,
+    }
+
+
 def fetch_posts(base_url: str) -> List[Dict]:
     today = datetime.now(timezone.utc).strftime("%d-%b-%Y")
     url = f"{base_url}{SEARCH_PATH}"
@@ -135,6 +260,7 @@ def fetch_posts(base_url: str) -> List[Dict]:
     }
 
     candidates: List[Dict] = []
+    detail_fetch_count = 0
     for page_index in range(MAX_PAGES):
         payload = {
             "PageIndex": page_index,
@@ -174,8 +300,17 @@ def fetch_posts(base_url: str) -> List[Dict]:
 
         for row in rows:
             post = _parse_row(row, base_url)
-            if post:
-                candidates.append(post)
+            if not post:
+                continue
+
+            notice_id = row.get("data-noticeid")
+            if notice_id and detail_fetch_count < MAX_DETAIL_FETCHES:
+                detail_fetch_count += 1
+                for key, value in _fetch_detail(notice_id, base_url).items():
+                    if value:
+                        post[key] = value
+
+            candidates.append(post)
 
         if len(rows) < PAGE_SIZE:
             break
