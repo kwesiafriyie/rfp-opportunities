@@ -5,13 +5,13 @@ import {
   DocumentTextIcon,
   GlobeAltIcon,
   ClockIcon,
-  EnvelopeIcon,
+  FireIcon,
   ArrowRightIcon,
   ArrowTopRightOnSquareIcon,
 } from "@heroicons/react/24/outline";
 import { API_URL } from "@/app/lib/api";
 import { SOURCE_STYLES, DeadlineBadge } from "@/app/components/opportunity-card";
-import { formatRelative } from "@/app/lib/deadline";
+import { formatRelative, getCountdown } from "@/app/lib/deadline";
 import OpportunityModal from "@/app/components/opportunity-modal";
 import useNowTick from "@/app/lib/useNowTick";
 
@@ -60,7 +60,6 @@ function StatTile({ icon: Icon, label, value, accent }) {
 export default function DashboardHome() {
   const now = useNowTick();
   const [opportunities, setOpportunities] = useState([]);
-  const [subscriberCount, setSubscriberCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selected, setSelected] = useState(null);
@@ -68,13 +67,9 @@ export default function DashboardHome() {
   useEffect(() => {
     const load = async () => {
       try {
-        const [oppRes, subRes] = await Promise.all([
-          fetch(`${API_URL}/api/opportunities/?limit=500`),
-          fetch(`${API_URL}/api/subscribers/`),
-        ]);
+        const oppRes = await fetch(`${API_URL}/api/opportunities/?limit=500`);
         if (!oppRes.ok) throw new Error(`HTTP error! Status: ${oppRes.status}`);
         setOpportunities(await oppRes.json());
-        if (subRes.ok) setSubscriberCount((await subRes.json()).length);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -112,6 +107,8 @@ export default function DashboardHome() {
     return acc;
   }, {});
 
+  const expiringSoon = openOpportunities.filter((o) => getCountdown(o.deadline, now)?.urgent).length;
+
   const recent = openOpportunities.slice(0, 5);
 
   return (
@@ -127,7 +124,7 @@ export default function DashboardHome() {
         <StatTile icon={DocumentTextIcon} label="Open Opportunities" value={openOpportunities.length} />
         <StatTile icon={GlobeAltIcon} label="Sources Monitored" value={SOURCES.length} />
         <StatTile icon={ClockIcon} label="New This Week" value={newThisWeek} accent />
-        <StatTile icon={EnvelopeIcon} label="Subscribers" value={subscriberCount} />
+        <StatTile icon={FireIcon} label="Expiring Soon (≤10 days)" value={expiringSoon} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
