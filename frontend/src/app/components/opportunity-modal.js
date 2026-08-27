@@ -11,11 +11,15 @@ import {
 import { SOURCE_STYLES, SOURCE_FULL_NAMES, formatDate } from "./opportunity-card";
 import { getCountdown } from "@/app/lib/deadline";
 import useNowTick from "@/app/lib/useNowTick";
+import { KPMG_FIT_UI_ENABLED } from "@/app/lib/featureFlags";
+import FitSection from "./kpmg-fit/fit-section";
 
 // A labeled block of the detail view. Sections are only ever rendered by the
 // caller when they have real content -- never an empty "Requirements" or
-// "Documents" heading with nothing under it.
-function Section({ title, children }) {
+// "Documents" heading with nothing under it. Exported so the KPMG Fit
+// section (and any future one) reuses the exact same heading/divider
+// treatment instead of a second, slightly-different component.
+export function Section({ title, children }) {
   return (
     <div className="mt-5 pt-5 border-t border-slate-100 first:mt-0 first:pt-0 first:border-t-0">
       <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2">{title}</h3>
@@ -197,6 +201,8 @@ export default function OpportunityModal({ opportunity, onClose }) {
               </div>
             </Section>
           )}
+
+          {KPMG_FIT_UI_ENABLED && <FitSection opportunity={opportunity} Section={Section} />}
         </div>
 
         <div className="px-6 py-4 border-t border-slate-100 bg-slate-50 flex flex-col sm:flex-row gap-3">
