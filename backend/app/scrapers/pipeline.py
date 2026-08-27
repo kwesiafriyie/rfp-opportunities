@@ -6,6 +6,7 @@ from typing import Dict, List, Tuple
 from sqlalchemy.orm import Session
 
 from ..core.keywords import find_matched_keywords
+from ..core.kpmg_fit_engine import compute_fit
 from ..core.normalize import classify_opportunity_type, classify_sector, summarize
 from ..core.sources import SOURCES, Source
 from ..models.opportunity import Opportunity
@@ -59,23 +60,39 @@ def _build_fields(post: Dict, keywords: List[str]) -> Dict:
     classification_text = description or post.get("excerpt")
     documents = post.get("documents")
     extra = post.get("extra")
+    deadline = post.get("deadline")
+    eligibility = post.get("eligibility")
+    sector = classify_sector(title, classification_text)
+
+    fit = compute_fit({
+        "title": title,
+        "description": description,
+        "eligibility": eligibility,
+        "sector": sector,
+        "deadline": deadline,
+    })
+
     return {
         "title": title,
         "excerpt": excerpt,
         "description": description,
         "published_at": post.get("published_at"),
-        "deadline": post.get("deadline"),
+        "deadline": deadline,
         "deadline_raw": post.get("deadline_raw"),
         "matched_keywords": ",".join(keywords),
         "organization": post.get("organization"),
         "country": post.get("country"),
         "reference": post.get("reference"),
         "opportunity_type": classify_opportunity_type(post.get("opportunity_type"), title, classification_text),
-        "sector": classify_sector(title, classification_text),
-        "eligibility": post.get("eligibility"),
+        "sector": sector,
+        "eligibility": eligibility,
         "contact_info": post.get("contact_info"),
         "documents": json.dumps(documents) if documents else None,
         "extra": json.dumps(extra) if extra else None,
+        "fit_status": fit["status"],
+        "fit_score": fit["score"],
+        "fit_tier": fit["tier"],
+        "fit_analysis": json.dumps(fit["analysis"]) if fit["analysis"] else None,
     }
 
 

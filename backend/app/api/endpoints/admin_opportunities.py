@@ -9,6 +9,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from ...core.database import get_db
+from ...core.kpmg_fit_engine import compute_fit
 from ...core.normalize import summarize
 from ...models.opportunity import Opportunity
 from ..deps import require_admin
@@ -63,6 +64,15 @@ def _normalize_manual_fields(payload: OpportunityIntake) -> dict:
     excerpt = summarize(payload.description) if payload.description else None
     documents = [d.dict() for d in payload.documents]
     extra = [e.dict() for e in payload.extra]
+
+    fit = compute_fit({
+        "title": payload.title,
+        "description": payload.description,
+        "eligibility": payload.eligibility,
+        "sector": payload.sector,
+        "deadline": payload.deadline,
+    })
+
     return {
         "title": payload.title,
         "excerpt": excerpt,
@@ -78,6 +88,10 @@ def _normalize_manual_fields(payload: OpportunityIntake) -> dict:
         "contact_info": payload.contact_info,
         "documents": json.dumps(documents) if documents else None,
         "extra": json.dumps(extra) if extra else None,
+        "fit_status": fit["status"],
+        "fit_score": fit["score"],
+        "fit_tier": fit["tier"],
+        "fit_analysis": json.dumps(fit["analysis"]) if fit["analysis"] else None,
     }
 
 
