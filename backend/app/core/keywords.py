@@ -11,6 +11,21 @@ doesn't use consulting language. Added as specific multi-word phrases, not
 bare words like "security"/"maintenance"/"development" -- those alone are
 far too generic and would also match physical guard/building-maintenance
 or unrelated "economic development" tenders.
+
+A further batch (payments modernisation, cloud migration, penetration
+testing, ...) was added from KPMG Ghana's real Connected/Powered/Trusted
+service pages, once that content was actually available to check against --
+see kpmg_taxonomy.py. Several plausible-looking additions were deliberately
+left out even though they're real KPMG service names, because they're too
+generic to be safe as standalone phrases across arbitrary procurement text:
+"quality assurance", "change management", "current state assessment", and
+bare "vulnerability assessment"/"business continuity"/"incident response"
+(narrowed to "penetration testing" and "business continuity management"/
+"cyber incident response" instead, which don't have the same collision
+risk with unrelated humanitarian/disaster-response or general-org-review
+tenders). "ERP"/"API"/"ISO"/"strategy" were already covered by the existing
+word list below, so most KPMG "X Strategy" service names already matched
+before this batch.
 """
 import re
 from typing import List
@@ -57,6 +72,19 @@ _PHRASES = [
     "application development",
     "ict services",
     "network infrastructure",
+    "payments modernisation",
+    "payments modernization",
+    "instant payments",
+    "digital channels",
+    "cloud migration",
+    "cloud readiness",
+    "penetration testing",
+    "business continuity management",
+    "cyber incident response",
+    "security architecture",
+    "post implementation review",
+    "embedded finance",
+    "open banking",
 ]
 
 # Short tokens need word-boundary matching, otherwise "eoi"/"rfp" style
@@ -77,6 +105,7 @@ _WORDS = [
     "api",
     "erp",
     "strategy",
+    "fintech",
 ]
 
 _WORD_PATTERN = re.compile(r"\b(" + "|".join(_WORDS) + r")\b", re.IGNORECASE)
