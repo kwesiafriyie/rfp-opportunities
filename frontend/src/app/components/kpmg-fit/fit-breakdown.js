@@ -24,7 +24,7 @@ export default function FitBreakdown({ breakdown }) {
             >
               <div className="h-full bg-slate-400 rounded-full" style={{ width: `${pct}%` }} />
             </div>
-            <dd className="font-mono text-xs text-slate-500 w-12 text-right flex-none">
+            <dd className="font-mono text-xs text-slate-500 w-14 text-right flex-none whitespace-nowrap">
               {dim.score} / {dim.max}
             </dd>
           </div>
