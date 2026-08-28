@@ -7,6 +7,8 @@ import {
   ChevronRightIcon,
 } from "@heroicons/react/24/outline";
 import { getCountdown, formatRelative } from "@/app/lib/deadline";
+import { KPMG_FIT_UI_ENABLED } from "@/app/lib/featureFlags";
+import FitChip from "./kpmg-fit/fit-chip";
 
 export const SOURCE_STYLES = {
   "standard.gm": "bg-blue-50 text-blue-700 ring-blue-600/20",
@@ -155,6 +157,8 @@ const OpportunityCard = ({ opportunity, onOpen, now }) => {
           <ArrowTopRightOnSquareIcon className="w-3.5 h-3.5" />
         </a>
       </div>
+
+      {KPMG_FIT_UI_ENABLED && <FitChip opportunity={opportunity} className="mt-2" />}
     </div>
   );
 };
