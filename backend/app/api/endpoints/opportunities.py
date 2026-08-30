@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 
 from ...core.database import SessionLocal, get_db
 from ...models.opportunity import Opportunity
+from ...schemas.opportunity import OpportunityOut
 from ...scrapers.pipeline import run_all_and_notify
 
 router = APIRouter()
@@ -39,7 +40,7 @@ def _parse_date_param(value: Optional[str]) -> Optional[datetime]:
     return parsed if parsed.tzinfo else parsed.replace(tzinfo=timezone.utc)
 
 
-@router.get("/", response_model=List[dict])
+@router.get("/", response_model=List[OpportunityOut])
 async def list_opportunities(
     response: Response,
     skip: int = 0,
@@ -144,7 +145,7 @@ async def get_filters(db: Session = Depends(get_db)):
     }
 
 
-@router.get("/{opportunity_id}", response_model=dict)
+@router.get("/{opportunity_id}", response_model=OpportunityOut)
 async def get_opportunity(opportunity_id: int, db: Session = Depends(get_db)):
     opportunity = db.query(Opportunity).filter(Opportunity.id == opportunity_id).first()
     if not opportunity:
